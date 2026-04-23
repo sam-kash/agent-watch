@@ -1,0 +1,18 @@
+{
+  "buildCommand": "npx prisma generate && next build",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "env": {
+    "DATABASE_URL":                    "@database-url",
+    "REDIS_URL":                       "@redis-url",
+    "NEXT_PUBLIC_SUPABASE_URL":        "@supabase-url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY":   "@supabase-anon-key",
+    "SUPABASE_SERVICE_ROLE_KEY":       "@supabase-service-role-key",
+    "STRIPE_SECRET_KEY":               "@stripe-secret-key",
+    "STRIPE_WEBHOOK_SECRET":           "@stripe-webhook-secret",
+    "STRIPE_PRICE_TEAM":               "@stripe-price-team",
+    "STRIPE_PRICE_SCALE":              "@stripe-price-scale",
+    "RESEND_API_KEY":                  "@resend-api-key",
+    "APP_SECRET":                      "@app-secret"
+  }
+}

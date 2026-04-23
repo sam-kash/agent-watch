@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+  apiKeys     ApiKey[]
+}
+
+// ─── Workspace ────────────────────────────────────────────────────────────────
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  plan      Plan     @default(FREE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
+
+  members    Membership[]
+  apiKeys    ApiKey[]
+  agents     Agent[]
+  events     Event[]
+  sessions   AgentSession[]
+  alertRules AlertRule[]
+}
+
+enum Plan {
+  FREE
+  TEAM
+  SCALE
+}
+
+model Membership {
+  id   String         @id @default(cuid())
+  role MembershipRole @default(MEMBER)
+
+  userId      String
+  workspaceId String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, workspaceId])
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// ─── API Keys ─────────────────────────────────────────────────────────────────
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  name       String
+  keyHash    String    @unique
+  keyPrefix  String
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  userId      String
+  workspaceId String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+// ─── Agents ───────────────────────────────────────────────────────────────────
+
+model Agent {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  framework   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  sessions AgentSession[]
+  events   Event[]
+}
+
+// ─── Sessions ─────────────────────────────────────────────────────────────────
+
+model AgentSession {
+  id         String        @id @default(cuid())
+  externalId String?
+  status     SessionStatus @default(RUNNING)
+  startedAt  DateTime      @default(now())
+  endedAt    DateTime?
+  durationMs Int?
+
+  totalTokensIn  Int   @default(0)
+  totalTokensOut Int   @default(0)
+  totalCostUsd   Float @default(0)
+  eventCount     Int   @default(0)
+  errorCount     Int   @default(0)
+  lastErrorMsg   String?
+
+  metadata Json?
+  tags     String[] @default([])
+
+  agentId     String
+  workspaceId String
+  agent       Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  events Event[]
+}
+
+enum SessionStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+  TIMEOUT
+}
+
+// ─── Events ───────────────────────────────────────────────────────────────────
+
+model Event {
+  id         String    @id @default(cuid())
+  type       EventType
+  occurredAt DateTime  @default(now())
+
+  model     String?
+  provider  String?
+  tokensIn  Int?
+  tokensOut Int?
+  costUsd   Float?
+  latencyMs Int?
+
+  toolName   String?
+  toolInput  Json?
+  toolOutput Json?
+
+  errorCode  String?
+  errorMsg   String?
+  errorStack String?
+
+  payload Json
+
+  sessionId   String
+  agentId     String
+  workspaceId String
+  session     AgentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  agent       Agent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, occurredAt(sort: Desc)])
+  @@index([sessionId, occurredAt(sort: Desc)])
+  @@index([agentId, occurredAt(sort: Desc)])
+}
+
+enum EventType {
+  LLM_CALL
+  TOOL_CALL
+  AGENT_START
+  AGENT_END
+  ERROR
+  CUSTOM
+}
+
+// ─── Alert Rules ──────────────────────────────────────────────────────────────
+
+model AlertRule {
+  id            String      @id @default(cuid())
+  name          String
+  enabled       Boolean     @default(true)
+  metric        AlertMetric
+  operator      String
+  threshold     Float
+  windowMin     Int         @default(60)
+  channel       String      @default("email")
+  channelConfig Json?
+  lastFiredAt   DateTime?
+  createdAt     DateTime    @default(now())
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+enum AlertMetric {
+  COST_USD
+  ERROR_RATE
+  LATENCY_P95
+  TOKEN_COUNT
+}

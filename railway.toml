@@ -1,0 +1,47 @@
+# railway.toml — defines services on Railway
+# Deploy with: railway up
+
+[build]
+builder = "nixpacks"
+
+# ─── Web (Next.js) ────────────────────────────────────────────────────────────
+[[services]]
+name = "web"
+source = "."
+
+[services.build]
+buildCommand = "npm run build"
+
+[services.deploy]
+startCommand = "npm start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+
+[services.variables]
+PORT = "3000"
+
+# ─── Event Worker ─────────────────────────────────────────────────────────────
+[[services]]
+name = "event-worker"
+source = "."
+
+[services.build]
+buildCommand = "npm install"
+
+[services.deploy]
+startCommand = "npx tsx src/workers/event-worker.ts"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+
+# ─── Alert Worker ─────────────────────────────────────────────────────────────
+[[services]]
+name = "alert-worker"
+source = "."
+
+[services.build]
+buildCommand = "npm install"
+
+[services.deploy]
+startCommand = "npx tsx src/workers/alert-worker.ts"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
