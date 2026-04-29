@@ -1,39 +1,58 @@
-import { Queue, Worker, QueueEvents } from "bullmq";
+import { Queue } from "bullmq";
 import IORedis from "ioredis";
 
 const REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
 
-// Shared Redis connection (BullMQ requires a dedicated connection per role)
-export const redisConnection = new IORedis(REDIS_URL, {
-  maxRetriesPerRequest: null, // Required by BullMQ
-});
-
-// ─── Queue names ──────────────────────────────────────────────────────────────
 export const QUEUES = {
   INGEST: "ingest-events",
   ALERTS: "check-alerts",
 } as const;
 
-// ─── Ingest queue (write path) ────────────────────────────────────────────────
-export const ingestQueue = new Queue(QUEUES.INGEST, {
-  connection: redisConnection,
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: { type: "exponential", delay: 1000 },
-    removeOnComplete: { count: 1000 },
-    removeOnFail: { count: 5000 },
-  },
-});
+let redisConnection: IORedis | null = null;
+let ingestQueue: Queue<IngestJobData> | null = null;
+let alertsQueue: Queue | null = null;
 
-// ─── Alerts queue ─────────────────────────────────────────────────────────────
-export const alertsQueue = new Queue(QUEUES.ALERTS, {
-  connection: redisConnection,
-  defaultJobOptions: {
-    attempts: 2,
-    backoff: { type: "fixed", delay: 5000 },
-    removeOnComplete: { count: 500 },
-  },
-});
+export function getRedisConnection() {
+  if (!redisConnection) {
+    redisConnection = new IORedis(REDIS_URL, {
+      lazyConnect: true,
+      maxRetriesPerRequest: null, // Required by BullMQ
+    });
+  }
+
+  return redisConnection;
+}
+
+export function getIngestQueue() {
+  if (!ingestQueue) {
+    ingestQueue = new Queue<IngestJobData>(QUEUES.INGEST, {
+      connection: getRedisConnection(),
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 1000 },
+        removeOnComplete: { count: 1000 },
+        removeOnFail: { count: 5000 },
+      },
+    });
+  }
+
+  return ingestQueue;
+}
+
+export function getAlertsQueue() {
+  if (!alertsQueue) {
+    alertsQueue = new Queue(QUEUES.ALERTS, {
+      connection: getRedisConnection(),
+      defaultJobOptions: {
+        attempts: 2,
+        backoff: { type: "fixed", delay: 5000 },
+        removeOnComplete: { count: 500 },
+      },
+    });
+  }
+
+  return alertsQueue;
+}
 
 export type IngestJobData = {
   workspaceId: string;

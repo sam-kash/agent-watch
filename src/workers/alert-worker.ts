@@ -1,5 +1,5 @@
 import { Worker } from "bullmq";
-import { redisConnection, QUEUES } from "@/lib/queue";
+import { getAlertsQueue, getRedisConnection, QUEUES } from "@/lib/queue";
 import { db } from "@/lib/db";
 import { Resend } from "resend";
 
@@ -45,7 +45,7 @@ export const alertWorker = new Worker(
       console.log(`[alerts] Fired: "${rule.name}" — ${rule.metric} = ${value} (threshold: ${rule.operator} ${rule.threshold})`);
     }
   },
-  { connection: redisConnection, concurrency: 5 }
+  { connection: getRedisConnection(), concurrency: 5 }
 );
 
 // ─── Metric computation ───────────────────────────────────────────────────────
@@ -185,7 +185,6 @@ function formatMetric(metric: string, value: number): string {
 
 // ─── Schedule recurring checks every 5 minutes ───────────────────────────────
 
-import { alertsQueue } from "@/lib/queue";
 import { db as dbClient } from "@/lib/db";
 
 async function scheduleAlertChecks() {
@@ -195,7 +194,7 @@ async function scheduleAlertChecks() {
   });
 
   for (const ws of workspaces) {
-    await alertsQueue.add(
+    await getAlertsQueue().add(
       "check-alerts",
       { workspaceId: ws.id },
       {

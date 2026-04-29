@@ -35,7 +35,7 @@ export default function SignupPage() {
     const res = await fetch("/api/workspaces", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, workspaceName }),
+      body: JSON.stringify({ email, workspaceName, supabaseUserId: data.user?.id }),
     });
 
     if (!res.ok) {

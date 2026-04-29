@@ -38,7 +38,7 @@ export function BillingPanel({ plan }: { plan: Plan }) {
       body: JSON.stringify({ priceId }),
     });
     const { url } = await res.json();
-    if (url) window.location.href = url;
+    if (url) window.location.assign(url);
     setLoading(null);
   }
 

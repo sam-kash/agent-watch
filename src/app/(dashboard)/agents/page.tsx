@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { CreateAgentButton } from "@/components/agents/CreateAgentButton";
+import { getServerAuthContext } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const FRAMEWORK_COLORS: Record<string, string> = {
   openai: "bg-green-50 text-green-700",
@@ -10,11 +12,14 @@ const FRAMEWORK_COLORS: Record<string, string> = {
 };
 
 export default async function AgentsPage() {
-  const WORKSPACE_ID = process.env.SEED_WORKSPACE_ID ?? "demo";
-  const since = new Date(Date.now() - 7 * 86400_000); // last 7 days
+  const ctx = await getServerAuthContext();
+  if (!ctx) redirect("/login");
+  const workspaceId = ctx.workspace.id;
+  const since = new Date();
+  since.setDate(since.getDate() - 7);
 
   const agents = await db.agent.findMany({
-    where: { workspaceId: WORKSPACE_ID },
+    where: { workspaceId },
     include: {
       _count: { select: { sessions: true, events: true } },
       sessions: {
@@ -42,7 +47,7 @@ export default async function AgentsPage() {
             {agents.length} agent{agents.length !== 1 ? "s" : ""} registered
           </p>
         </div>
-        <CreateAgentButton workspaceId={WORKSPACE_ID} />
+        <CreateAgentButton />
       </div>
 
       {agents.length === 0 ? (

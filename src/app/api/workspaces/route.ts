@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 
 const Schema = z.object({
   email: z.string().email(),
   workspaceName: z.string().min(1).max(80),
+  supabaseUserId: z.string().min(1),
 });
 
 // Called right after Supabase signup to provision the workspace
@@ -16,7 +18,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 422 });
   }
 
-  const { email, workspaceName } = parsed.data;
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: "Supabase is not configured" }, { status: 503 });
+  }
+
+  const { email, workspaceName, supabaseUserId } = parsed.data;
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { persistSession: false } }
+  );
+  const { data, error } = await supabase.auth.admin.getUserById(supabaseUserId);
+
+  if (error || data.user?.email !== email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   // Idempotent — if user already exists just return their workspace
   const existing = await db.user.findUnique({

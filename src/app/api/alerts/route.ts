@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthContext } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { AlertRuleSchema } from "@/lib/schemas";
+import { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   const ctx = await getAuthContext(req);
@@ -26,8 +27,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Validation failed", issues: parsed.error.issues }, { status: 422 });
   }
 
+  const { channelConfig, ...ruleData } = parsed.data;
+
   const rule = await db.alertRule.create({
-    data: { ...parsed.data, workspaceId: ctx.workspace.id },
+    data: {
+      ...ruleData,
+      channelConfig: channelConfig as Prisma.InputJsonValue | undefined,
+      workspaceId: ctx.workspace.id,
+    },
   });
 
   return NextResponse.json({ rule }, { status: 201 });

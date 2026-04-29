@@ -3,19 +3,17 @@ import Stripe from "stripe";
 import { getAuthContext } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-});
-
-// POST /api/stripe/checkout — creates a Stripe Checkout session
 export async function POST(req: NextRequest) {
   const ctx = await getAuthContext(req);
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
+  }
 
+  const stripe = getStripe();
   const { priceId } = await req.json();
   const { workspace, user } = ctx;
 
-  // Get or create Stripe customer
   let customerId = workspace.stripeCustomerId;
   if (!customerId) {
     const customer = await stripe.customers.create({
@@ -40,4 +38,10 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json({ url: session.url });
+}
+
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-03-25.dahlia",
+  });
 }

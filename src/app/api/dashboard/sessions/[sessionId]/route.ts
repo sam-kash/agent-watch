@@ -4,15 +4,16 @@ import { db } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   const ctx = await getAuthContext(req);
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { workspace } = ctx;
+  const { sessionId } = await params;
 
   const session = await db.agentSession.findFirst({
-    where: { id: params.sessionId, workspaceId: workspace.id },
+    where: { id: sessionId, workspaceId: workspace.id },
     include: {
       agent: true,
       events: {

@@ -1,17 +1,21 @@
 import { db } from "@/lib/db";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
 import { TraceTimeline } from "@/components/sessions/TraceTimeline";
 import { SessionSummaryCard } from "@/components/sessions/SessionSummaryCard";
+import { getServerAuthContext } from "@/lib/auth";
 
 export default async function SessionDetailPage({
   params,
 }: {
-  params: { sessionId: string };
+  params: Promise<{ sessionId: string }>;
 }) {
-  const WORKSPACE_ID = process.env.SEED_WORKSPACE_ID ?? "demo";
+  const ctx = await getServerAuthContext();
+  if (!ctx) redirect("/login");
+  const { sessionId } = await params;
 
   const session = await db.agentSession.findFirst({
-    where: { id: params.sessionId, workspaceId: WORKSPACE_ID },
+    where: { id: sessionId, workspaceId: ctx.workspace.id },
     include: {
       agent: true,
       events: {
@@ -29,9 +33,9 @@ export default async function SessionDetailPage({
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-          <a href="/sessions" className="hover:text-gray-600">
+          <Link href="/sessions" className="hover:text-gray-600">
             Sessions
-          </a>
+          </Link>
           <span>/</span>
           <span className="font-mono">{session.id.slice(0, 16)}…</span>
         </div>

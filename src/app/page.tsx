@@ -22,7 +22,7 @@ export default function LandingPage() {
         <div className="flex items-center gap-6">
           <a href="#pricing" className="text-sm text-gray-500 hover:text-gray-900">Pricing</a>
           <Link href="/login" className="text-sm text-gray-500 hover:text-gray-900">Log in</Link>
-          <Link href="/onboarding" className="text-sm bg-violet-600 text-white px-4 py-1.5 rounded-lg hover:bg-violet-700 transition-colors">
+          <Link href="/signup" className="text-sm bg-violet-600 text-white px-4 py-1.5 rounded-lg hover:bg-violet-700 transition-colors">
             Get started free
           </Link>
         </div>
@@ -42,11 +42,11 @@ export default function LandingPage() {
           failure alerts, and token usage. Two lines of code. No infrastructure.
         </p>
         <div className="flex gap-3 justify-center flex-wrap">
-          <Link href="/onboarding" className="bg-violet-600 text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
+          <Link href="/signup" className="bg-violet-600 text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
             Start free — takes 5 minutes
           </Link>
           <Link href="/dashboard" className="border border-gray-200 text-gray-700 px-6 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
-            View demo dashboard →
+            Open dashboard →
           </Link>
         </div>
       </section>
@@ -106,7 +106,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/onboarding" className={`block text-center text-sm py-2.5 rounded-xl transition-colors ${plan.featured ? "bg-violet-600 text-white hover:bg-violet-700" : "border border-gray-200 text-gray-700 hover:bg-gray-50"}`}>
+              <Link href="/signup" className={`block text-center text-sm py-2.5 rounded-xl transition-colors ${plan.featured ? "bg-violet-600 text-white hover:bg-violet-700" : "border border-gray-200 text-gray-700 hover:bg-gray-50"}`}>
                 {plan.cta}
               </Link>
             </div>

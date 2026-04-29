@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { CreateAgentSchema } from "@/lib/schemas";
 import { checkAgentLimit } from "@/lib/plan-limits";
+import { getAuthContext } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const workspaceId = searchParams.get("workspaceId") ?? process.env.SEED_WORKSPACE_ID ?? "demo";
+  const ctx = await getAuthContext(req);
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const agents = await db.agent.findMany({
-    where: { workspaceId },
+    where: { workspaceId: ctx.workspace.id },
     include: { _count: { select: { sessions: true } } },
     orderBy: { createdAt: "desc" },
   });
@@ -17,6 +18,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const ctx = await getAuthContext(req);
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (ctx.role === "MEMBER") {
+    return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
+  }
+
   const body = await req.json();
   const parsed = CreateAgentSchema.safeParse(body);
 
@@ -27,23 +34,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const workspaceId = body.workspaceId ?? process.env.SEED_WORKSPACE_ID ?? "demo";
-
-  // Enforce plan agent limit
-  const workspace = await db.workspace.findUnique({
-    where: { id: workspaceId },
-    select: { plan: true },
-  });
-
-  if (workspace) {
-    const limitCheck = await checkAgentLimit(workspaceId, workspace.plan);
-    if (!limitCheck.allowed) {
-      return NextResponse.json({ error: limitCheck.reason }, { status: 402 });
-    }
+  const limitCheck = await checkAgentLimit(ctx.workspace.id, ctx.workspace.plan);
+  if (!limitCheck.allowed) {
+    return NextResponse.json({ error: limitCheck.reason }, { status: 402 });
   }
 
   const agent = await db.agent.create({
-    data: { ...parsed.data, workspaceId },
+    data: { ...parsed.data, workspaceId: ctx.workspace.id },
   });
 
   return NextResponse.json({ agent }, { status: 201 });

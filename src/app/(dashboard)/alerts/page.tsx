@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { AlertRulesList } from "@/components/alerts/AlertRulesList";
+import { getServerAuthContext } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const METRIC_LABELS: Record<string, string> = {
   COST_USD: "Total cost (USD)",
@@ -9,10 +11,11 @@ const METRIC_LABELS: Record<string, string> = {
 };
 
 export default async function AlertsPage() {
-  const WORKSPACE_ID = process.env.SEED_WORKSPACE_ID ?? "demo";
+  const ctx = await getServerAuthContext();
+  if (!ctx) redirect("/login");
 
   const rules = await db.alertRule.findMany({
-    where: { workspaceId: WORKSPACE_ID },
+    where: { workspaceId: ctx.workspace.id },
     orderBy: { createdAt: "desc" },
   });
 

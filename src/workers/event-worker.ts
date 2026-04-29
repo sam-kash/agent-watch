@@ -1,8 +1,8 @@
 import { Worker } from "bullmq";
-import { redisConnection, QUEUES, type IngestJobData } from "@/lib/queue";
+import { getRedisConnection, QUEUES, type IngestJobData } from "@/lib/queue";
 import { db } from "@/lib/db";
 import { calculateCostUsd } from "@/lib/cost";
-import { EventType, SessionStatus } from "@prisma/client";
+import { EventType, Prisma, SessionStatus } from "@prisma/client";
 
 /**
  * The event worker is the core of AgentWatch's write path.
@@ -41,7 +41,7 @@ export const eventWorker = new Worker<IngestJobData>(
     let sessionEnded = false;
     let sessionFailed = false;
 
-    const eventCreateInputs = events.map((raw) => {
+    const eventCreateInputs: Prisma.EventCreateManyInput[] = events.map((raw) => {
       const type = raw.type as EventType;
       const payload = raw.payload as Record<string, unknown>;
       const occurredAt = raw.occurredAt ? new Date(raw.occurredAt) : new Date();
@@ -77,7 +77,7 @@ export const eventWorker = new Worker<IngestJobData>(
       return {
         type,
         occurredAt,
-        payload,
+        payload: payload as Prisma.InputJsonValue,
         model,
         provider,
         tokensIn,
@@ -85,8 +85,8 @@ export const eventWorker = new Worker<IngestJobData>(
         costUsd,
         latencyMs,
         toolName,
-        toolInput: payload.tool_input as Record<string, unknown> | undefined,
-        toolOutput: payload.tool_output as Record<string, unknown> | undefined,
+        toolInput: payload.tool_input as Prisma.InputJsonValue | undefined,
+        toolOutput: payload.tool_output as Prisma.InputJsonValue | undefined,
         errorCode,
         errorMsg,
         errorStack,
@@ -123,7 +123,7 @@ export const eventWorker = new Worker<IngestJobData>(
     job.log(`Processed ${events.length} events for session ${sessionId}. Cost delta: $${sessionCostDelta.toFixed(6)}`);
   },
   {
-    connection: redisConnection,
+    connection: getRedisConnection(),
     concurrency: 10, // Process 10 jobs in parallel
   }
 );

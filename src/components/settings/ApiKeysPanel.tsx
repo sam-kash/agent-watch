@@ -61,7 +61,7 @@ export function ApiKeysPanel({ keys: initial }: { keys: Key[] }) {
       {newKey && (
         <div className="mb-4 bg-green-50 border border-green-200 rounded-xl p-4">
           <p className="text-xs text-green-700 font-medium mb-2">
-            Copy this key now — it won't be shown again.
+            Copy this key now — it won&apos;t be shown again.
           </p>
           <div className="flex gap-2">
             <code className="flex-1 text-xs bg-white border border-green-200 rounded-lg px-3 py-2 font-mono truncate">
@@ -74,7 +74,7 @@ export function ApiKeysPanel({ keys: initial }: { keys: Key[] }) {
           </div>
           <button onClick={() => setNewKey(null)}
             className="text-xs text-green-600 mt-2 hover:underline">
-            I've saved it, dismiss
+            I&apos;ve saved it, dismiss
           </button>
         </div>
       )}

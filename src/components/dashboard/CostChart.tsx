@@ -40,7 +40,7 @@ export function CostChart({ data }: Props) {
               tick={{ fontSize: 10, fill: "#9ca3af" }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(v) => `$${v.toFixed(3)}`}
+              tickFormatter={(v) => `$${Number(v).toFixed(3)}`}
             />
             <Tooltip
               contentStyle={{
@@ -49,7 +49,7 @@ export function CostChart({ data }: Props) {
                 borderRadius: 8,
                 fontSize: 12,
               }}
-              formatter={(v: number) => [`$${v.toFixed(6)}`, "Cost"]}
+              formatter={(v) => [`$${Number(v ?? 0).toFixed(6)}`, "Cost"]}
             />
             <Area
               type="monotone"

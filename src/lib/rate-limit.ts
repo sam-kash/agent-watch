@@ -1,4 +1,4 @@
-import { redisConnection } from "@/lib/queue";
+import { getRedisConnection } from "@/lib/queue";
 
 type RateLimitResult = {
   allowed: boolean;
@@ -24,7 +24,7 @@ export async function rateLimit(
 
   // Use a sorted set: member = timestamp, score = timestamp
   // Pipeline for atomicity
-  const pipeline = redisConnection.pipeline();
+  const pipeline = getRedisConnection().pipeline();
   pipeline.zremrangebyscore(redisKey, "-inf", clearBefore);       // remove old entries
   pipeline.zadd(redisKey, now, `${now}-${Math.random()}`);        // add current request
   pipeline.zcard(redisKey);                                        // count in window

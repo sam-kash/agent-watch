@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function CreateAgentButton({ workspaceId }: { workspaceId: string }) {
+export function CreateAgentButton() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newId, setNewId] = useState<string | null>(null);
@@ -16,7 +16,7 @@ export function CreateAgentButton({ workspaceId }: { workspaceId: string }) {
     const res = await fetch("/api/agents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, workspaceId }),
+      body: JSON.stringify(form),
     });
     const data = await res.json();
     if (data.agent) {

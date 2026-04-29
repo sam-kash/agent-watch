@@ -4,6 +4,8 @@ import { CostChart } from "@/components/dashboard/CostChart";
 import { SessionsTable } from "@/components/dashboard/SessionsTable";
 import { TopAgents } from "@/components/dashboard/TopAgents";
 import { RangePicker } from "@/components/dashboard/RangePicker";
+import { getServerAuthContext } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 // This is a server component — data fetched at request time, no client JS needed
 export default async function DashboardPage({
@@ -14,34 +16,34 @@ export default async function DashboardPage({
   const range = searchParams.range ?? "24h";
   const since = getRangeStart(range);
 
-  // Workspace ID would come from session in production — hardcoded for scaffold
-  // Replace with: const ctx = await getAuthContext() once auth is wired
-  const WORKSPACE_ID = process.env.SEED_WORKSPACE_ID ?? "demo";
+  const ctx = await getServerAuthContext();
+  if (!ctx) redirect("/login");
+  const workspaceId = ctx.workspace.id;
 
   const [costResult, sessionStats, topAgentsRaw, errorCount, recentSessions, costSeries] =
     await Promise.all([
       db.event.aggregate({
-        where: { workspaceId: WORKSPACE_ID, occurredAt: { gte: since } },
+        where: { workspaceId, occurredAt: { gte: since } },
         _sum: { costUsd: true, tokensIn: true, tokensOut: true },
         _count: { id: true },
       }),
       db.agentSession.groupBy({
         by: ["status"],
-        where: { workspaceId: WORKSPACE_ID, startedAt: { gte: since } },
+        where: { workspaceId, startedAt: { gte: since } },
         _count: { id: true },
       }),
       db.event.groupBy({
         by: ["agentId"],
-        where: { workspaceId: WORKSPACE_ID, occurredAt: { gte: since }, costUsd: { gt: 0 } },
+        where: { workspaceId, occurredAt: { gte: since }, costUsd: { gt: 0 } },
         _sum: { costUsd: true },
         orderBy: { _sum: { costUsd: "desc" } },
         take: 5,
       }),
       db.event.count({
-        where: { workspaceId: WORKSPACE_ID, type: "ERROR", occurredAt: { gte: since } },
+        where: { workspaceId, type: "ERROR", occurredAt: { gte: since } },
       }),
       db.agentSession.findMany({
-        where: { workspaceId: WORKSPACE_ID },
+        where: { workspaceId },
         include: { agent: { select: { name: true } } },
         orderBy: { startedAt: "desc" },
         take: 8,
@@ -51,7 +53,7 @@ export default async function DashboardPage({
           to_char(date_trunc('hour', "occurredAt"), 'HH24:00') AS label,
           COALESCE(SUM("costUsd"), 0)::float AS cost
         FROM "Event"
-        WHERE "workspaceId" = ${WORKSPACE_ID}
+        WHERE "workspaceId" = ${workspaceId}
           AND "occurredAt" >= ${since}
         GROUP BY date_trunc('hour', "occurredAt")
         ORDER BY date_trunc('hour', "occurredAt") ASC

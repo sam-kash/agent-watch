@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { ingestQueue } from "@/lib/queue";
+import { getIngestQueue } from "@/lib/queue";
 import { hashApiKey, extractBearerToken } from "@/lib/api-keys";
 import { IngestPayloadSchema } from "@/lib/schemas";
 import { rateLimit, getPlanLimits } from "@/lib/rate-limit";
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 6. Enqueue for async processing ──────────────────────────────────────
-  await ingestQueue.add(
+  await getIngestQueue().add(
     "process-events",
     { workspaceId: apiKey.workspaceId, agentId, sessionId, events },
     { jobId: `${sessionId}-${Date.now()}` }

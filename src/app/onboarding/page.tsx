@@ -75,7 +75,7 @@ await session.end();`;
           <span className="text-lg font-semibold">
             <span className="text-violet-600">●</span> AgentWatch
           </span>
-          <p className="text-sm text-gray-400 mt-1">Let's get your first agent tracked</p>
+          <p className="text-sm text-gray-400 mt-1">Let&apos;s get your first agent tracked</p>
         </div>
 
         {/* Progress */}
@@ -167,7 +167,7 @@ await session.end();`;
             <div>
               <h2 className="text-base font-semibold mb-1">Add the SDK to your agent</h2>
               <p className="text-sm text-gray-400 mb-5">
-                Copy your API key now — it won't be shown again.
+                Copy your API key now — it won&apos;t be shown again.
               </p>
 
               <div className="mb-4">
@@ -219,7 +219,7 @@ await session.end();`;
                 onClick={() => setStep(4)}
                 className="w-full text-sm bg-violet-600 text-white py-2.5 rounded-lg hover:bg-violet-700 transition-colors"
               >
-                I've added the SDK →
+                I&apos;ve added the SDK →
               </button>
             </div>
           )}
@@ -231,7 +231,7 @@ await session.end();`;
               </div>
               <h2 className="text-base font-semibold mb-2">Waiting for your first event</h2>
               <p className="text-sm text-gray-400 mb-6">
-                Run your agent with the SDK installed. As soon as it fires an event, you'll see it in
+                Run your agent with the SDK installed. As soon as it fires an event, you&apos;ll see it in
                 your dashboard.
               </p>
 

@@ -3,7 +3,7 @@ import { z } from "zod";
 export const RawEventSchema = z.object({
   type: z.enum(["LLM_CALL", "TOOL_CALL", "AGENT_START", "AGENT_END", "ERROR", "CUSTOM"]),
   occurredAt: z.string().datetime().optional(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
 });
 
 export const IngestPayloadSchema = z.object({
@@ -24,7 +24,7 @@ export const AlertRuleSchema = z.object({
   threshold: z.number().positive(),
   windowMin: z.number().int().min(5).max(1440).default(60),
   channel: z.enum(["email", "slack", "webhook"]).default("email"),
-  channelConfig: z.record(z.string()).optional(),
+  channelConfig: z.record(z.string(), z.unknown()).optional(),
 });
 
 // ─── API key creation schema ──────────────────────────────────────────────────

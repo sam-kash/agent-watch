@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { SessionsFilter } from "@/components/sessions/SessionsFilter";
+import { getServerAuthContext } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const STATUS_STYLES: Record<string, string> = {
   COMPLETED: "bg-green-50 text-green-700",
@@ -14,14 +16,16 @@ export default async function SessionsPage({
 }: {
   searchParams: { page?: string; status?: string; agentId?: string; search?: string };
 }) {
-  const WORKSPACE_ID = process.env.SEED_WORKSPACE_ID ?? "demo";
+  const ctx = await getServerAuthContext();
+  if (!ctx) redirect("/login");
+  const workspaceId = ctx.workspace.id;
   const page = Math.max(1, parseInt(searchParams.page ?? "1"));
   const limit = 25;
   const status = searchParams.status;
   const agentId = searchParams.agentId;
 
   const where = {
-    workspaceId: WORKSPACE_ID,
+    workspaceId,
     ...(status && { status: status as any }),
     ...(agentId && { agentId }),
   };
@@ -36,7 +40,7 @@ export default async function SessionsPage({
     }),
     db.agentSession.count({ where }),
     db.agent.findMany({
-      where: { workspaceId: WORKSPACE_ID },
+      where: { workspaceId },
       select: { id: true, name: true },
     }),
   ]);

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "worker:events": "tsx src/workers/event-worker.ts",
     "worker:alerts": "tsx src/workers/alert-worker.ts",
     "workers": "concurrently \"npm run worker:events\" \"npm run worker:alerts\"",

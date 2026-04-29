@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { getServerAuthContext } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const PLAN_LIMITS = {
   FREE: { events: 10_000, agents: 1, label: "Starter" },
@@ -8,14 +10,11 @@ const PLAN_LIMITS = {
 };
 
 export default async function UsagePage() {
-  const WORKSPACE_ID = process.env.SEED_WORKSPACE_ID ?? "demo";
+  const ctx = await getServerAuthContext();
+  if (!ctx) redirect("/login");
 
-  const workspace = await db.workspace.findUnique({
-    where: { id: WORKSPACE_ID },
-    select: { plan: true, name: true },
-  });
-
-  const plan = workspace?.plan ?? "FREE";
+  const workspaceId = ctx.workspace.id;
+  const plan = ctx.workspace.plan;
   const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS] ?? PLAN_LIMITS.FREE;
 
   const startOfMonth = new Date();
@@ -24,15 +23,15 @@ export default async function UsagePage() {
 
   const [eventCount, agentCount, tokenResult, costResult, dailySeries] = await Promise.all([
     db.event.count({
-      where: { workspaceId: WORKSPACE_ID, occurredAt: { gte: startOfMonth } },
+      where: { workspaceId, occurredAt: { gte: startOfMonth } },
     }),
-    db.agent.count({ where: { workspaceId: WORKSPACE_ID } }),
+    db.agent.count({ where: { workspaceId } }),
     db.event.aggregate({
-      where: { workspaceId: WORKSPACE_ID, occurredAt: { gte: startOfMonth } },
+      where: { workspaceId, occurredAt: { gte: startOfMonth } },
       _sum: { tokensIn: true, tokensOut: true },
     }),
     db.event.aggregate({
-      where: { workspaceId: WORKSPACE_ID, occurredAt: { gte: startOfMonth } },
+      where: { workspaceId, occurredAt: { gte: startOfMonth } },
       _sum: { costUsd: true },
     }),
     // Daily events this month
@@ -42,7 +41,7 @@ export default async function UsagePage() {
         COUNT(*)::int                                       AS count,
         COALESCE(SUM("costUsd"), 0)::float                  AS cost
       FROM "Event"
-      WHERE "workspaceId" = ${WORKSPACE_ID}
+      WHERE "workspaceId" = ${workspaceId}
         AND "occurredAt" >= ${startOfMonth}
       GROUP BY date_trunc('day', "occurredAt")
       ORDER BY date_trunc('day', "occurredAt") ASC

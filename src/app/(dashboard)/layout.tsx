@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { ReactNode } from "react";
-import { createServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
+import { getServerAuthContext } from "@/lib/auth";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: "▦" },
@@ -13,29 +12,11 @@ const NAV = [
 ];
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const ctx = await getServerAuthContext();
+  if (!ctx) redirect("/login");
 
-  // In dev with seed data, skip auth check
-  const isDev = process.env.NODE_ENV === "development" && process.env.SEED_WORKSPACE_ID;
-  if (!user && !isDev) redirect("/login");
-
-  // Get workspace info for the sidebar
-  let plan = "FREE";
-  let workspaceName = "My Workspace";
-
-  if (user) {
-    const membership = await db.membership.findFirst({
-      where: { user: { email: user.email! } },
-      include: { workspace: { select: { name: true, plan: true } } },
-    });
-    if (membership) {
-      plan = membership.workspace.plan;
-      workspaceName = membership.workspace.name;
-    }
-  }
+  const plan = ctx.workspace.plan;
+  const workspaceName = ctx.workspace.name;
 
   return (
     <div className="flex h-screen bg-gray-50 text-gray-900">
