@@ -31,6 +31,12 @@ export default function SignupPage() {
       return;
     }
 
+    if (data.user?.identities && data.user.identities.length === 0) {
+      setError("An account with this email already exists. Please sign in.");
+      setLoading(false);
+      return;
+    }
+
     // 2. Create workspace + user record via API
     const res = await fetch("/api/workspaces", {
       method: "POST",

@@ -75,38 +75,35 @@ export function AlertRulesList({ rules: initial, metricLabels }: Props) {
     setSaving(false);
   }
 
-  const inputCls = "w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white";
-
   return (
     <div className="space-y-4">
       <button
         onClick={() => setShowForm(!showForm)}
-        className="text-sm bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors"
+        className={showForm ? "btn-secondary text-[11px]" : "btn-primary text-[11px]"}
       >
         {showForm ? "Cancel" : "+ New alert rule"}
       </button>
 
       {showForm && (
-        <form onSubmit={createRule}
-          className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-          <h3 className="text-sm font-medium">New alert rule</h3>
+        <form onSubmit={createRule} className="panel p-5 space-y-4 animate-slide-down">
+          <h3 className="text-sm font-display font-semibold text-t-primary">New alert rule</h3>
 
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Rule name</label>
+            <label className="text-[9px] font-mono text-t-ghost uppercase tracking-wider block mb-1.5">Rule name</label>
             <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="e.g. Daily cost spike" className={inputCls} />
+              placeholder="e.g. Daily cost spike" className="input-field" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Metric</label>
-              <select value={form.metric} onChange={(e) => setForm({ ...form, metric: e.target.value })} className={inputCls}>
+              <label className="text-[9px] font-mono text-t-ghost uppercase tracking-wider block mb-1.5">Metric</label>
+              <select value={form.metric} onChange={(e) => setForm({ ...form, metric: e.target.value })} className="input-field">
                 {METRICS.map((m) => <option key={m} value={m}>{metricLabels[m] ?? m}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Channel</label>
-              <select value={form.channel} onChange={(e) => setForm({ ...form, channel: e.target.value })} className={inputCls}>
+              <label className="text-[9px] font-mono text-t-ghost uppercase tracking-wider block mb-1.5">Channel</label>
+              <select value={form.channel} onChange={(e) => setForm({ ...form, channel: e.target.value })} className="input-field">
                 <option value="email">Email</option>
                 <option value="slack">Slack</option>
                 <option value="webhook">Webhook</option>
@@ -116,69 +113,80 @@ export function AlertRulesList({ rules: initial, metricLabels }: Props) {
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Condition</label>
-              <select value={form.operator} onChange={(e) => setForm({ ...form, operator: e.target.value })} className={inputCls}>
+              <label className="text-[9px] font-mono text-t-ghost uppercase tracking-wider block mb-1.5">Condition</label>
+              <select value={form.operator} onChange={(e) => setForm({ ...form, operator: e.target.value })} className="input-field">
                 {OPERATORS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Threshold</label>
+              <label className="text-[9px] font-mono text-t-ghost uppercase tracking-wider block mb-1.5">Threshold</label>
               <input required type="number" step="any" value={form.threshold}
                 onChange={(e) => setForm({ ...form, threshold: e.target.value })}
-                placeholder="0.50" className={inputCls} />
+                placeholder="0.50" className="input-field" />
             </div>
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Window (min)</label>
+              <label className="text-[9px] font-mono text-t-ghost uppercase tracking-wider block mb-1.5">Window (min)</label>
               <input type="number" value={form.windowMin}
                 onChange={(e) => setForm({ ...form, windowMin: e.target.value })}
-                className={inputCls} />
+                className="input-field" />
             </div>
           </div>
 
           <button type="submit" disabled={saving}
-            className="w-full text-sm bg-violet-600 text-white py-2 rounded-lg hover:bg-violet-700 disabled:opacity-50">
+            className="btn-primary w-full justify-center disabled:opacity-50">
             {saving ? "Saving…" : "Create rule"}
           </button>
         </form>
       )}
 
       {rules.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl py-12 text-center text-sm text-gray-400">
-          No alert rules yet. Create one to get notified when things go wrong.
+        <div className="panel py-12 text-center text-xs font-mono text-t-ghost">
+          ◆ No alert rules yet. Create one to get notified when things go wrong.
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {rules.map((rule) => (
             <div key={rule.id}
-              className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-4">
+              className="panel px-4 py-3 flex items-center gap-4 hover:border-glow-border transition-all">
+              {/* Toggle */}
               <button
                 onClick={() => toggleRule(rule.id, !rule.enabled)}
-                className={`w-9 h-5 rounded-full transition-colors flex-shrink-0 relative ${
-                  rule.enabled ? "bg-violet-600" : "bg-gray-200"
+                className={`w-9 h-5 rounded-full transition-all flex-shrink-0 relative ${
+                  rule.enabled
+                    ? "bg-cyan/20 border border-cyan/30"
+                    : "bg-elevated border border-dim-border"
                 }`}
               >
-                <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                  rule.enabled ? "translate-x-4" : "translate-x-0.5"
+                <span className={`absolute top-0.5 w-4 h-4 rounded-full shadow transition-all ${
+                  rule.enabled
+                    ? "translate-x-4 bg-cyan shadow-[0_0_6px_var(--glow-cyan)]"
+                    : "translate-x-0.5 bg-t-ghost"
                 }`} />
               </button>
 
+              {/* Rule info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800">{rule.name}</p>
-                <p className="text-xs text-gray-400">
-                  {metricLabels[rule.metric]} {rule.operator} {rule.threshold}
-                  {" · "}{rule.windowMin}min window
-                  {" · "}{rule.channel}
+                <p className={`text-xs font-mono font-medium ${rule.enabled ? "text-t-primary" : "text-t-ghost"}`}>
+                  {rule.name}
+                </p>
+                <p className="text-[10px] font-mono text-t-ghost">
+                  <span className="text-amber">{metricLabels[rule.metric]}</span>
+                  {" "}{rule.operator}{" "}
+                  <span className="text-t-secondary">{rule.threshold}</span>
+                  <span className="text-t-ghost"> · {rule.windowMin}min window · {rule.channel}</span>
                 </p>
               </div>
 
+              {/* Last fired */}
               {rule.lastFiredAt && (
-                <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full flex-shrink-0">
+                <span className="text-[10px] font-mono text-amber bg-amber/10 border border-amber/20 px-2 py-0.5 rounded flex-shrink-0">
                   fired {timeAgo(new Date(rule.lastFiredAt))}
                 </span>
               )}
 
+              {/* Delete */}
               <button onClick={() => deleteRule(rule.id)}
-                className="text-gray-300 hover:text-red-400 text-sm transition-colors flex-shrink-0">
+                className="text-t-ghost hover:text-acc-red text-xs transition-colors flex-shrink-0">
                 ✕
               </button>
             </div>

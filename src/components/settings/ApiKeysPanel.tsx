@@ -53,27 +53,27 @@ export function ApiKeysPanel({ keys: initial }: { keys: Key[] }) {
 
   return (
     <div>
-      <h2 className="text-sm font-medium text-gray-800 mb-1">API keys</h2>
-      <p className="text-xs text-gray-400 mb-4">
+      <h2 className="text-sm font-display font-semibold text-t-primary mb-1">API keys</h2>
+      <p className="text-[10px] font-mono text-t-ghost mb-4">
         Use these keys to authenticate the AgentWatch SDK from your agents.
       </p>
 
       {newKey && (
-        <div className="mb-4 bg-green-50 border border-green-200 rounded-xl p-4">
-          <p className="text-xs text-green-700 font-medium mb-2">
-            Copy this key now — it won&apos;t be shown again.
+        <div className="mb-4 panel border-acc-green/30 p-4 animate-slide-down">
+          <p className="text-[10px] font-mono text-acc-green font-medium mb-2 glow-green">
+            ◉ Copy this key now — it won&apos;t be shown again.
           </p>
           <div className="flex gap-2">
-            <code className="flex-1 text-xs bg-white border border-green-200 rounded-lg px-3 py-2 font-mono truncate">
+            <code className="flex-1 text-[11px] bg-void border border-dim-border rounded-md px-3 py-2 font-mono truncate text-cyan">
               {newKey}
             </code>
             <button onClick={copy}
-              className="text-xs px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+              className="btn-primary text-[10px] px-3">
               {copied ? "Copied!" : "Copy"}
             </button>
           </div>
           <button onClick={() => setNewKey(null)}
-            className="text-xs text-green-600 mt-2 hover:underline">
+            className="text-[10px] font-mono text-acc-green mt-2 hover:underline">
             I&apos;ve saved it, dismiss
           </button>
         </div>
@@ -85,42 +85,42 @@ export function ApiKeysPanel({ keys: initial }: { keys: Key[] }) {
           onChange={(e) => setName(e.target.value)}
           placeholder="Key name (e.g. Production)"
           required
-          className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500"
+          className="input-field flex-1"
         />
         <button type="submit" disabled={creating}
-          className="text-sm bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors">
+          className="btn-primary text-[11px] disabled:opacity-50">
           {creating ? "Creating…" : "Create key"}
         </button>
       </form>
 
-      <div className="border border-gray-200 rounded-xl overflow-hidden">
+      <div className="panel overflow-hidden">
         {keys.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-8">No API keys yet</p>
+          <p className="text-xs font-mono text-t-ghost text-center py-8">◆ No API keys yet</p>
         ) : (
-          <table className="w-full text-sm">
+          <table className="data-table">
             <thead>
-              <tr className="text-xs text-gray-400 bg-gray-50 border-b border-gray-100">
-                <th className="text-left px-4 py-2 font-normal">Name</th>
-                <th className="text-left px-4 py-2 font-normal">Prefix</th>
-                <th className="text-left px-4 py-2 font-normal">Last used</th>
-                <th className="text-left px-4 py-2 font-normal">Created</th>
-                <th className="px-4 py-2" />
+              <tr>
+                <th>Name</th>
+                <th>Prefix</th>
+                <th>Last used</th>
+                <th>Created</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {keys.map((k) => (
-                <tr key={k.id} className="border-b border-gray-50 last:border-0">
-                  <td className="px-4 py-2.5 text-gray-700">{k.name}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-gray-500">{k.keyPrefix}…</td>
-                  <td className="px-4 py-2.5 text-xs text-gray-400">
+                <tr key={k.id}>
+                  <td className="text-[11px] text-t-primary">{k.name}</td>
+                  <td className="font-mono text-[10px] text-cyan">{k.keyPrefix}…</td>
+                  <td className="text-[10px] text-t-ghost">
                     {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : "Never"}
                   </td>
-                  <td className="px-4 py-2.5 text-xs text-gray-400">
+                  <td className="text-[10px] text-t-ghost">
                     {new Date(k.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-2.5 text-right">
+                  <td className="text-right">
                     <button onClick={() => revoke(k.id)}
-                      className="text-xs text-gray-300 hover:text-red-400 transition-colors">
+                      className="text-[10px] font-mono text-t-ghost hover:text-acc-red transition-colors">
                       Revoke
                     </button>
                   </td>

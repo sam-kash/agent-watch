@@ -15,8 +15,8 @@ export default async function SettingsPage() {
   });
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-8">
-      <h1 className="text-lg font-semibold">Settings</h1>
+    <div className="p-5 max-w-2xl mx-auto space-y-6 animate-fade-in">
+      <h1 className="font-display text-lg font-semibold text-t-primary">Settings</h1>
       <ApiKeysPanel keys={keys} />
       <BillingPanel plan={ctx.workspace.plan} />
     </div>

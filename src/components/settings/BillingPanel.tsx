@@ -44,9 +44,9 @@ export function BillingPanel({ plan }: { plan: Plan }) {
 
   return (
     <div>
-      <h2 className="text-sm font-medium text-gray-800 mb-1">Billing</h2>
-      <p className="text-xs text-gray-400 mb-4">
-        Current plan: <span className="font-medium text-gray-700">{plan}</span>
+      <h2 className="text-sm font-display font-semibold text-t-primary mb-1">Billing</h2>
+      <p className="text-[10px] font-mono text-t-ghost mb-4">
+        Current plan: <span className="text-cyan font-medium">{plan}</span>
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -54,33 +54,38 @@ export function BillingPanel({ plan }: { plan: Plan }) {
           const isCurrent = p.id === plan;
           return (
             <div key={p.id}
-              className={`border rounded-xl p-4 ${
+              className={`panel p-4 transition-all ${
                 isCurrent
-                  ? "border-violet-300 bg-violet-50"
-                  : "border-gray-200 bg-white"
+                  ? "border-cyan/30 border-glow-cyan"
+                  : "hover:border-glow-border"
               }`}>
               <div className="flex items-baseline justify-between mb-3">
-                <span className="text-sm font-medium">{p.name}</span>
-                <span className="text-lg font-semibold">{p.price}<span className="text-xs text-gray-400 font-normal">/mo</span></span>
+                <span className="text-[10px] font-mono font-bold tracking-[0.1em] text-t-ghost uppercase">
+                  {p.name}
+                </span>
+                <span className="font-display text-lg font-semibold text-t-primary">
+                  {p.price}
+                  <span className="text-[10px] text-t-ghost font-mono font-normal">/mo</span>
+                </span>
               </div>
 
-              <ul className="space-y-1 mb-4">
+              <ul className="space-y-1.5 mb-4">
                 {p.features.map((f) => (
-                  <li key={f} className="text-xs text-gray-600 flex items-center gap-1.5">
-                    <span className="text-green-500">✓</span> {f}
+                  <li key={f} className="text-[10px] font-mono text-t-secondary flex items-center gap-1.5">
+                    <span className="text-acc-green">✓</span> {f}
                   </li>
                 ))}
               </ul>
 
               {isCurrent ? (
-                <div className="text-xs text-center text-violet-600 font-medium py-1.5">
+                <div className="text-[10px] text-center text-cyan font-mono font-medium py-1.5 bg-cyan/5 border border-cyan/20 rounded-md">
                   Current plan
                 </div>
               ) : p.priceId ? (
                 <button
                   onClick={() => upgrade(p.priceId!, p.id)}
                   disabled={!!loading}
-                  className="w-full text-xs bg-violet-600 text-white py-2 rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
+                  className="btn-primary w-full justify-center text-[10px] disabled:opacity-50"
                 >
                   {loading === p.id ? "Redirecting…" : `Upgrade to ${p.name}`}
                 </button>

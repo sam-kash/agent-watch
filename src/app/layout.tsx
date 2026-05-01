@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AgentWatch",
-  description: "AI agent observability for cost, traces, failures, and token usage.",
+  title: "AgentWatch — AI Agent Observability",
+  description: "Track cost, traces, failures, and token usage across every agent run. Beautiful observability for your AI agents.",
 };
 
 export default function RootLayout({
@@ -12,8 +12,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col bg-void text-t-primary scrollbar-thin">
+        {children}
+      </body>
     </html>
   );
 }

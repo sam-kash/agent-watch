@@ -1,28 +1,312 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+
+@source "../../src";
+
+/* ─── Radiant Light Design System ────────────────────────────────────────── */
+
+@theme {
+  /* Backgrounds */
+  --color-void: #fafafa;
+  --color-surface: #ffffff;
+  --color-elevated: #f4f4f5;
+  --color-hover: #f1f5f9;
+
+  /* Borders */
+  --color-dim-border: #e4e4e7;
+  --color-glow-border: #cbd5e1;
+  --color-active-border: #94a3b8;
+
+  /* Text */
+  --color-t-primary: #09090b;
+  --color-t-secondary: #52525b;
+  --color-t-ghost: #71717a;
+
+  /* Accents */
+  --color-cyan: #0284c7;
+  --color-amber: #d97706;
+  --color-acc-red: #e11d48;
+  --color-acc-green: #16a34a;
+  --color-acc-violet: #7c3aed;
+  --color-acc-blue: #2563eb;
+
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Custom animations */
+  --animate-fade-in: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-down: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-gradient-shift: gradient-shift 8s ease infinite;
+}
+
+/* ─── Base Layer ─────────────────────────────────────────────────────────── */
 
 @layer base {
   * {
     box-sizing: border-box;
   }
+
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background: var(--color-void);
+    color-scheme: light;
   }
+
   body {
-    @apply text-gray-900 bg-white;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--color-void);
+    color: var(--color-t-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
   }
-  code,
-  pre {
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--color-t-primary);
+  }
+
+  code, pre {
+    font-family: var(--font-mono);
+  }
+
+  ::selection {
+    background: rgba(37, 99, 235, 0.15);
+    color: var(--color-t-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-acc-blue);
+    outline-offset: 2px;
   }
 }
 
-@layer utilities {
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: #e5e7eb transparent;
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-glow-border) transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-dim-border);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--color-glow-border);
+  }
+}
+
+/* ─── Glassmorphism / Panels ─────────────────────────────────────────────── */
+
+@layer components {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--color-dim-border);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Interactive Hover Lift */
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    border-color: var(--color-glow-border);
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .glass-pill {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-dim-border);
+    border-radius: 9999px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Interactive Elements ───────────────────────────────────────────────── */
+
+@layer components {
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: #ffffff;
+    background: #000000;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    background: #18181b;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-t-primary);
+    background: #ffffff;
+    border: 1px solid var(--color-dim-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+
+  .btn-secondary:hover {
+    background: #f8fafc;
+    border-color: var(--color-glow-border);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+  }
+
+  .input-field {
+    background: #ffffff;
+    border: 1px solid var(--color-dim-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--color-t-primary);
+    transition: all 0.2s ease;
+    width: 100%;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+  }
+
+  .input-field:focus {
+    border-color: var(--color-acc-blue);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .input-field::placeholder {
+    color: var(--color-t-ghost);
+  }
+}
+
+/* ─── Table Styles ───────────────────────────────────────────────────────── */
+
+@layer components {
+  .data-table {
+    width: 100%;
+    font-size: 13px;
+    border-collapse: collapse;
+  }
+
+  .data-table thead tr {
+    border-bottom: 1px solid var(--color-dim-border);
+    background: rgba(0,0,0,0.01);
+  }
+
+  .data-table thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-t-ghost);
+  }
+
+  .data-table tbody tr {
+    border-bottom: 1px solid var(--color-dim-border);
+    transition: all 0.2s ease;
+  }
+
+  .data-table tbody tr:hover {
+    background: var(--color-hover);
+  }
+
+  .data-table tbody td {
+    padding: 12px 16px;
+    color: var(--color-t-secondary);
+  }
+}
+
+/* ─── Ambient Glow Utilities ─────────────────────────────────────────────── */
+
+@utility ambient-glow {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@utility ambient-glow-purple {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
 }

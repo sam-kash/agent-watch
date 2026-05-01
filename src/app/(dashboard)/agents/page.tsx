@@ -5,10 +5,10 @@ import { getServerAuthContext } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 const FRAMEWORK_COLORS: Record<string, string> = {
-  openai: "bg-green-50 text-green-700",
-  langchain: "bg-blue-50 text-blue-700",
-  anthropic: "bg-violet-50 text-violet-700",
-  custom: "bg-gray-100 text-gray-600",
+  openai: "bg-acc-green/10 text-acc-green border-acc-green/20",
+  langchain: "bg-acc-blue/10 text-acc-blue border-acc-blue/20",
+  anthropic: "bg-acc-violet/10 text-acc-violet border-acc-violet/20",
+  custom: "bg-elevated text-t-ghost border-dim-border",
 };
 
 export default async function AgentsPage() {
@@ -39,11 +39,11 @@ export default async function AgentsPage() {
   });
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-5 max-w-5xl mx-auto animate-fade-in">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-lg font-semibold">Agents</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="font-display text-lg font-semibold text-t-primary">Agents</h1>
+          <p className="text-[11px] font-mono text-t-ghost">
             {agents.length} agent{agents.length !== 1 ? "s" : ""} registered
           </p>
         </div>
@@ -51,79 +51,79 @@ export default async function AgentsPage() {
       </div>
 
       {agents.length === 0 ? (
-        <div className="bg-white border border-dashed border-gray-300 rounded-xl py-16 text-center">
-          <p className="text-sm text-gray-400 mb-2">No agents yet</p>
-          <p className="text-xs text-gray-400">Create an agent to get its ID for the SDK</p>
+        <div className="panel border-dashed py-16 text-center">
+          <p className="text-xs font-mono text-t-ghost mb-1">◆ No agents yet</p>
+          <p className="text-[10px] font-mono text-t-ghost">Create an agent to get its ID for the SDK</p>
         </div>
       ) : (
         <div className="grid gap-3">
           {enriched.map((agent) => (
             <div
               key={agent.id}
-              className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors"
+              className="panel p-0 overflow-hidden hover:border-glow-border transition-all duration-200 group"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-sm font-medium text-gray-900">{agent.name}</h3>
-                    {agent.framework && (
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          FRAMEWORK_COLORS[agent.framework] ?? FRAMEWORK_COLORS.custom
-                        }`}
-                      >
-                        {agent.framework}
-                      </span>
-                    )}
-                  </div>
-                  {agent.description && (
-                    <p className="text-xs text-gray-400 mb-3 truncate">{agent.description}</p>
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-3 border-b border-dim-border/50">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-2 h-2 rounded-full bg-cyan flex-shrink-0" />
+                  <h3 className="text-sm font-display font-semibold text-t-primary truncate group-hover:text-cyan transition-colors">
+                    {agent.name}
+                  </h3>
+                  {agent.framework && (
+                    <span
+                      className={`text-[9px] font-mono font-medium tracking-wider px-2 py-0.5 rounded border ${
+                        FRAMEWORK_COLORS[agent.framework] ?? FRAMEWORK_COLORS.custom
+                      }`}
+                    >
+                      {agent.framework.toUpperCase()}
+                    </span>
                   )}
-                  {/* Agent ID for SDK */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">Agent ID:</span>
-                    <code className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-700">
-                      {agent.id}
-                    </code>
-                  </div>
                 </div>
-
-                {/* 7d stats */}
-                <div className="flex gap-6 ml-6 flex-shrink-0">
-                  {[
-                    { label: "7d cost", value: `$${agent.cost7d.toFixed(4)}` },
-                    { label: "7d sessions", value: String(agent.sessions7d) },
-                    { label: "7d errors", value: String(agent.errors7d), red: agent.errors7d > 0 },
-                    { label: "all time", value: `${agent._count.sessions} runs` },
-                  ].map((stat) => (
-                    <div key={stat.label} className="text-right">
-                      <p className="text-xs text-gray-400">{stat.label}</p>
-                      <p
-                        className={`text-sm font-medium ${
-                          stat.red ? "text-red-500" : "text-gray-800"
-                        }`}
-                      >
-                        {stat.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                {agent.description && (
+                  <p className="text-[10px] font-mono text-t-ghost truncate max-w-xs">
+                    {agent.description}
+                  </p>
+                )}
               </div>
 
-              {/* Quick links */}
-              <div className="mt-3 pt-3 border-t border-gray-100 flex gap-4">
-                <Link
-                  href={`/sessions?agentId=${agent.id}`}
-                  className="text-xs text-violet-600 hover:underline"
-                >
-                  View sessions →
-                </Link>
-                <Link
-                  href={`/dashboard?agentId=${agent.id}`}
-                  className="text-xs text-gray-400 hover:text-gray-600"
-                >
-                  Analytics →
-                </Link>
+              {/* Stats grid */}
+              <div className="grid grid-cols-4 divide-x divide-dim-border/50">
+                {[
+                  { label: "7d cost", value: `$${agent.cost7d.toFixed(4)}`, color: "text-amber" },
+                  { label: "7d sessions", value: String(agent.sessions7d), color: "text-t-primary" },
+                  { label: "7d errors", value: String(agent.errors7d), color: agent.errors7d > 0 ? "text-acc-red" : "text-acc-green" },
+                  { label: "all time", value: `${agent._count.sessions} runs`, color: "text-t-secondary" },
+                ].map((stat) => (
+                  <div key={stat.label} className="px-5 py-3">
+                    <p className="text-[9px] font-mono text-t-ghost uppercase tracking-wider mb-0.5">{stat.label}</p>
+                    <p className={`text-sm font-mono font-medium ${stat.color}`}>{stat.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between px-5 py-2.5 border-t border-dim-border/50 bg-elevated/30">
+                {/* Agent ID */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-mono text-t-ghost uppercase tracking-wider">ID</span>
+                  <code className="text-[10px] font-mono bg-void px-2 py-0.5 rounded border border-dim-border text-cyan/70">
+                    {agent.id}
+                  </code>
+                </div>
+                <div className="flex gap-4">
+                  <Link
+                    href={`/sessions?agentId=${agent.id}`}
+                    className="text-[10px] font-mono text-cyan hover:underline"
+                  >
+                    Sessions →
+                  </Link>
+                  <Link
+                    href={`/dashboard?agentId=${agent.id}`}
+                    className="text-[10px] font-mono text-t-ghost hover:text-t-secondary"
+                  >
+                    Analytics →
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

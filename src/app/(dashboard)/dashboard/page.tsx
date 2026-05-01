@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { MetricCard } from "@/components/dashboard/MetricCard";
+import { MetricStrip } from "@/components/dashboard/MetricStrip";
 import { CostChart } from "@/components/dashboard/CostChart";
 import { SessionsTable } from "@/components/dashboard/SessionsTable";
 import { TopAgents } from "@/components/dashboard/TopAgents";
@@ -11,9 +11,10 @@ import { redirect } from "next/navigation";
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: { range?: string };
+  searchParams: Promise<{ range?: string }>;
 }) {
-  const range = searchParams.range ?? "24h";
+  const params = await searchParams;
+  const range = params.range ?? "24h";
   const since = getRangeStart(range);
 
   const ctx = await getServerAuthContext();
@@ -76,45 +77,59 @@ export default async function DashboardPage({
     costUsd: a._sum.costUsd ?? 0,
   }));
 
+  const totalCost = costResult._sum.costUsd ?? 0;
+  const totalTokens = (costResult._sum.tokensIn ?? 0) + (costResult._sum.tokensOut ?? 0);
+
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-5 max-w-7xl mx-auto animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-lg font-semibold">Overview</h1>
-          <p className="text-sm text-gray-500">What your agents did in the last {rangeLabel(range)}</p>
+          <h1 className="font-display text-lg font-semibold text-t-primary">Overview</h1>
+          <p className="text-[11px] font-mono text-t-ghost">
+            Agent activity in the last {rangeLabel(range)}
+          </p>
         </div>
         <RangePicker current={range} />
       </div>
 
-      {/* Metric cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <MetricCard
-          label="Total cost"
-          value={`$${(costResult._sum.costUsd ?? 0).toFixed(4)}`}
-          sub={`${formatNumber(costResult._sum.tokensIn ?? 0)} tokens in`}
-        />
-        <MetricCard
-          label="Sessions"
-          value={String(totalSessions)}
-          sub={`${failedSessions} failed`}
-          subColor={failedSessions > 0 ? "red" : "gray"}
-        />
-        <MetricCard label="LLM calls" value={formatNumber(costResult._count.id)} sub="events tracked" />
-        <MetricCard
-          label="Errors"
-          value={String(errorCount)}
-          sub={
-            totalSessions > 0
-              ? `${((failedSessions / totalSessions) * 100).toFixed(1)}% session failure rate`
-              : "—"
-          }
-          subColor={errorCount > 0 ? "red" : "gray"}
+      {/* Metric strip */}
+      <div className="mb-5">
+        <MetricStrip
+          metrics={[
+            {
+              label: "Total cost",
+              value: `$${totalCost.toFixed(4)}`,
+              sub: `${formatNumber(costResult._sum.tokensIn ?? 0)} tokens in`,
+              color: "amber",
+            },
+            {
+              label: "Sessions",
+              value: String(totalSessions),
+              sub: failedSessions > 0 ? `${failedSessions} failed` : "all healthy",
+              color: failedSessions > 0 ? "red" : "default",
+            },
+            {
+              label: "LLM calls",
+              value: formatNumber(costResult._count.id),
+              sub: `${formatNumber(totalTokens)} total tokens`,
+              color: "cyan",
+            },
+            {
+              label: "Errors",
+              value: String(errorCount),
+              sub:
+                totalSessions > 0
+                  ? `${((failedSessions / totalSessions) * 100).toFixed(1)}% failure rate`
+                  : "—",
+              color: errorCount > 0 ? "red" : "green",
+            },
+          ]}
         />
       </div>
 
       {/* Chart + Top agents */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-5">
         <div className="lg:col-span-2">
           <CostChart data={costSeries.map((r) => ({ label: r.label, costUsd: r.cost }))} />
         </div>

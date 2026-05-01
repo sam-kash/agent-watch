@@ -29,28 +29,32 @@ export default async function SessionDetailPage({
   const summary = buildSummary(session);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-5 max-w-5xl mx-auto animate-fade-in">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-          <Link href="/sessions" className="hover:text-gray-600">
+      <div className="mb-5">
+        <div className="flex items-center gap-2 text-[10px] font-mono text-t-ghost mb-2">
+          <Link href="/sessions" className="hover:text-cyan transition-colors">
             Sessions
           </Link>
-          <span>/</span>
-          <span className="font-mono">{session.id.slice(0, 16)}…</span>
+          <span className="text-t-ghost">/</span>
+          <span className="text-t-secondary">{session.id.slice(0, 16)}…</span>
         </div>
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold">{session.agent.name}</h1>
+          <h1 className="font-display text-lg font-semibold text-t-primary">
+            {session.agent.name}
+          </h1>
           <StatusBadge status={session.status} />
         </div>
       </div>
 
-      {/* Summary cards */}
+      {/* Summary */}
       <SessionSummaryCard session={session} summary={summary} />
 
       {/* Trace timeline */}
-      <div className="mt-6">
-        <h2 className="text-sm font-medium text-gray-700 mb-3">Trace</h2>
+      <div className="mt-5">
+        <h2 className="text-[9px] font-mono font-medium tracking-[0.12em] text-t-ghost uppercase mb-3">
+          Trace timeline
+        </h2>
         <TraceTimeline events={session.events as any} sessionStart={session.startedAt} />
       </div>
     </div>
@@ -58,18 +62,17 @@ export default async function SessionDetailPage({
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    COMPLETED: "bg-green-50 text-green-700 border border-green-200",
-    RUNNING: "bg-blue-50 text-blue-700 border border-blue-200",
-    FAILED: "bg-red-50 text-red-700 border border-red-200",
-    TIMEOUT: "bg-amber-50 text-amber-700 border border-amber-200",
+  const config: Record<string, { dot: string; text: string }> = {
+    COMPLETED: { dot: "status-dot-completed", text: "text-acc-green" },
+    RUNNING: { dot: "status-dot-running", text: "text-cyan" },
+    FAILED: { dot: "status-dot-failed", text: "text-acc-red" },
+    TIMEOUT: { dot: "status-dot-timeout", text: "text-amber" },
   };
+  const cfg = config[status] ?? { dot: "status-dot-completed", text: "text-t-ghost" };
+
   return (
-    <span
-      className={`text-xs px-2.5 py-1 rounded-full ${
-        styles[status] ?? "bg-gray-100 text-gray-500"
-      }`}
-    >
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-mono font-medium border border-dim-border bg-elevated ${cfg.text}`}>
+      <span className={`status-dot ${cfg.dot}`} />
       {status.toLowerCase()}
     </span>
   );

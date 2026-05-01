@@ -4,55 +4,52 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   agents: { id: string; name: string }[];
-  current: { status?: string; agentId?: string };
+  current: { status?: string; agentId?: string; search?: string };
 };
-
-const STATUSES = ["", "COMPLETED", "FAILED", "RUNNING", "TIMEOUT"];
 
 export function SessionsFilter({ agents, current }: Props) {
   const router = useRouter();
-  const params = useSearchParams();
+  const searchParams = useSearchParams();
 
   function update(key: string, value: string) {
-    const next = new URLSearchParams(params.toString());
-    if (value) next.set(key, value);
-    else next.delete(key);
-    next.delete("page");
-    router.push(`?${next.toString()}`);
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    params.delete("page");
+    router.push(`?${params.toString()}`);
   }
 
   return (
-    <div className="flex gap-3 flex-wrap">
+    <div className="flex items-center gap-3">
+      {/* Status filter */}
       <select
         value={current.status ?? ""}
         onChange={(e) => update("status", e.target.value)}
-        className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+        className="input-field text-[11px] py-1.5 w-36"
       >
         <option value="">All statuses</option>
-        {STATUSES.filter(Boolean).map((s) => (
-          <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
-        ))}
+        <option value="COMPLETED">Completed</option>
+        <option value="RUNNING">Running</option>
+        <option value="FAILED">Failed</option>
+        <option value="TIMEOUT">Timeout</option>
       </select>
 
+      {/* Agent filter */}
       <select
         value={current.agentId ?? ""}
         onChange={(e) => update("agentId", e.target.value)}
-        className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+        className="input-field text-[11px] py-1.5 w-44"
       >
         <option value="">All agents</option>
         {agents.map((a) => (
-          <option key={a.id} value={a.id}>{a.name}</option>
+          <option key={a.id} value={a.id}>
+            {a.name}
+          </option>
         ))}
       </select>
-
-      {(current.status || current.agentId) && (
-        <button
-          onClick={() => router.push("?")}
-          className="text-xs text-gray-400 hover:text-gray-600 px-2"
-        >
-          Clear filters ✕
-        </button>
-      )}
     </div>
   );
 }

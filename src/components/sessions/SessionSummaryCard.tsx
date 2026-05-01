@@ -1,63 +1,69 @@
-type Session = {
-  totalCostUsd: number;
-  totalTokensIn: number;
-  totalTokensOut: number;
-  eventCount: number;
-  errorCount: number;
-  durationMs: number | null;
-  startedAt: Date;
-  endedAt: Date | null;
-  agent: { name: string; framework: string | null };
+type Props = {
+  session: {
+    totalCostUsd: number;
+    totalTokensIn: number;
+    totalTokensOut: number;
+    errorCount: number;
+    eventCount: number;
+    durationMs?: number | null;
+    tags: string[];
+  };
+  summary: string;
 };
 
-export function SessionSummaryCard({
-  session,
-  summary,
-}: {
-  session: Session;
-  summary: string;
-}) {
+export function SessionSummaryCard({ session, summary }: Props) {
   const metrics = [
-    { label: "Cost", value: `$${session.totalCostUsd.toFixed(5)}` },
-    { label: "Tokens in", value: fmtNum(session.totalTokensIn) },
-    { label: "Tokens out", value: fmtNum(session.totalTokensOut) },
-    { label: "Events", value: String(session.eventCount) },
-    { label: "Errors", value: String(session.errorCount), red: session.errorCount > 0 },
-    { label: "Duration", value: session.durationMs ? `${(session.durationMs / 1000).toFixed(2)}s` : "—" },
+    { label: "Cost", value: `$${session.totalCostUsd.toFixed(5)}`, color: "text-amber" },
+    { label: "Tokens in", value: String(session.totalTokensIn), color: "text-t-primary" },
+    { label: "Tokens out", value: String(session.totalTokensOut), color: "text-t-primary" },
+    { label: "Events", value: String(session.eventCount), color: "text-cyan" },
+    {
+      label: "Errors",
+      value: String(session.errorCount),
+      color: session.errorCount > 0 ? "text-acc-red" : "text-acc-green",
+    },
+    {
+      label: "Duration",
+      value: session.durationMs ? `${(session.durationMs / 1000).toFixed(1)}s` : "—",
+      color: "text-t-primary",
+    },
   ];
 
   return (
-    <div className="space-y-3">
-      <div className="bg-violet-50 border border-violet-100 rounded-xl px-4 py-3">
-        <p className="text-xs text-violet-500 font-medium mb-1">Summary</p>
-        <p className="text-sm text-violet-900">{summary}</p>
-      </div>
-
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+    <div className="panel overflow-hidden">
+      {/* Metrics strip */}
+      <div className="flex items-center divide-x divide-dim-border border-b border-dim-border">
         {metrics.map((m) => (
-          <div key={m.label} className="bg-white border border-gray-200 rounded-xl p-3">
-            <p className="text-xs text-gray-400 mb-1">{m.label}</p>
-            <p className={`text-lg font-semibold ${m.red ? "text-red-500" : ""}`}>{m.value}</p>
+          <div key={m.label} className="flex-1 px-4 py-3">
+            <p className="text-[9px] font-mono font-medium tracking-[0.12em] text-t-ghost uppercase mb-0.5">
+              {m.label}
+            </p>
+            <p className={`text-sm font-mono font-semibold ${m.color}`}>{m.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="flex gap-4 text-xs text-gray-400 px-1">
-        <span>Agent: <span className="text-gray-600">{session.agent.name}</span></span>
-        {session.agent.framework && (
-          <span>Framework: <span className="text-gray-600">{session.agent.framework}</span></span>
-        )}
-        <span>Started: <span className="text-gray-600">{new Date(session.startedAt).toLocaleString()}</span></span>
-        {session.endedAt && (
-          <span>Ended: <span className="text-gray-600">{new Date(session.endedAt).toLocaleString()}</span></span>
-        )}
+      {/* AI Summary */}
+      <div className="px-4 py-3">
+        <p className="text-[9px] font-mono font-medium tracking-[0.12em] text-t-ghost uppercase mb-1">
+          Summary
+        </p>
+        <p className="text-[11px] font-mono text-t-secondary leading-relaxed">{summary}</p>
       </div>
+
+      {/* Tags */}
+      {session.tags.length > 0 && (
+        <div className="px-4 pb-3 flex items-center gap-2">
+          {session.tags.map((tag) => (
+            <span
+              key={tag}
+              className="text-[9px] font-mono px-2 py-0.5 rounded bg-elevated border border-dim-border text-t-ghost"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
-}
-
-function fmtNum(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
 }

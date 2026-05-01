@@ -22,12 +22,42 @@ type Event = {
 };
 
 const TYPE_CONFIG: Record<string, { color: string; bg: string; dot: string; label: string }> = {
-  LLM_CALL: { color: "text-violet-700", bg: "bg-violet-50 border-violet-100", dot: "bg-violet-400", label: "LLM call" },
-  TOOL_CALL: { color: "text-blue-700", bg: "bg-blue-50 border-blue-100", dot: "bg-blue-400", label: "Tool call" },
-  AGENT_START: { color: "text-green-700", bg: "bg-green-50 border-green-100", dot: "bg-green-400", label: "Start" },
-  AGENT_END: { color: "text-green-700", bg: "bg-green-50 border-green-100", dot: "bg-green-400", label: "End" },
-  ERROR: { color: "text-red-700", bg: "bg-red-50 border-red-100", dot: "bg-red-400", label: "Error" },
-  CUSTOM: { color: "text-gray-700", bg: "bg-gray-50 border-gray-100", dot: "bg-gray-400", label: "Custom" },
+  LLM_CALL: {
+    color: "text-acc-violet",
+    bg: "bg-acc-violet/10 border-acc-violet/20",
+    dot: "bg-acc-violet shadow-[0_0_8px_rgba(124,58,237,0.4)]",
+    label: "LLM",
+  },
+  TOOL_CALL: {
+    color: "text-acc-blue",
+    bg: "bg-acc-blue/10 border-acc-blue/20",
+    dot: "bg-acc-blue shadow-[0_0_8px_rgba(37,99,235,0.4)]",
+    label: "Tool",
+  },
+  AGENT_START: {
+    color: "text-t-primary",
+    bg: "bg-slate-100 border-dim-border",
+    dot: "bg-t-ghost",
+    label: "Start",
+  },
+  AGENT_END: {
+    color: "text-acc-green",
+    bg: "bg-acc-green/10 border-acc-green/20",
+    dot: "bg-acc-green shadow-[0_0_8px_rgba(22,163,74,0.4)]",
+    label: "End",
+  },
+  ERROR: {
+    color: "text-acc-red",
+    bg: "bg-acc-red/10 border-acc-red/20",
+    dot: "bg-acc-red shadow-[0_0_8px_rgba(225,29,72,0.4)]",
+    label: "Error",
+  },
+  CUSTOM: {
+    color: "text-t-secondary",
+    bg: "bg-slate-100 border-dim-border",
+    dot: "bg-t-ghost",
+    label: "Event",
+  },
 };
 
 export function TraceTimeline({
@@ -49,8 +79,11 @@ export function TraceTimeline({
 
   if (events.length === 0) {
     return (
-      <div className="bg-white border border-gray-200 rounded-xl py-12 text-center text-sm text-gray-300">
-        No events recorded for this session
+      <div className="glass-panel py-16 flex flex-col items-center justify-center text-t-ghost bg-white hover-lift">
+        <svg className="w-10 h-10 mb-4 opacity-40 text-t-ghost" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p className="text-[14px] font-semibold text-t-secondary">No events recorded yet</p>
       </div>
     );
   }
@@ -58,122 +91,159 @@ export function TraceTimeline({
   const start = new Date(sessionStart).getTime();
 
   return (
-    <div className="space-y-1.5">
-      {events.map((event, idx) => {
-        const cfg = TYPE_CONFIG[event.type] ?? TYPE_CONFIG.CUSTOM;
-        const open = expanded.has(event.id);
-        const offsetMs = new Date(event.occurredAt).getTime() - start;
+    <div className="relative pl-6">
+      {/* Trace wire — soft glass line */}
+      <div className="absolute left-[34px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-slate-200 via-slate-100 to-transparent rounded-full" />
 
-        return (
-          <div key={event.id}
-            className={`border rounded-xl overflow-hidden transition-all ${cfg.bg}`}>
-            <button
-              onClick={() => toggle(event.id)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:brightness-95 transition-all"
-            >
-              <span className="text-xs text-gray-400 w-5 text-right">{idx + 1}</span>
-              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
+      <div className="space-y-4">
+        {events.map((event, idx) => {
+          const cfg = TYPE_CONFIG[event.type] ?? TYPE_CONFIG.CUSTOM;
+          const open = expanded.has(event.id);
+          const offsetMs = new Date(event.occurredAt).getTime() - start;
 
-              <span className={`text-xs font-medium w-20 ${cfg.color}`}>{cfg.label}</span>
+          return (
+            <div key={event.id} className="relative z-10">
+              <button
+                onClick={() => toggle(event.id)}
+                className={`w-full flex items-center gap-4 px-4 py-3 text-left rounded-xl border transition-all group ${
+                  open ? "bg-white border-dim-border shadow-md" : "border-transparent hover:bg-white hover:border-dim-border hover:shadow-sm"
+                }`}
+              >
+                {/* Dot on the trace wire */}
+                <span className={`w-3 h-3 rounded-full flex-shrink-0 ${cfg.dot} relative ring-4 ring-void transition-transform ${open ? "scale-125" : ""}`} />
 
-              <span className="text-xs text-gray-700 flex-1 truncate">
-                {eventLabel(event)}
-              </span>
-
-              {event.costUsd != null && event.costUsd > 0 && (
-                <span className="text-xs font-mono text-gray-500 w-20 text-right">
-                  ${event.costUsd.toFixed(5)}
+                {/* Type label */}
+                <span className={`text-[11px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-md border ${cfg.color} ${cfg.bg}`}>
+                  {cfg.label}
                 </span>
-              )}
 
-              {event.latencyMs != null && (
-                <span className="text-xs text-gray-400 w-16 text-right">
-                  {event.latencyMs}ms
+                {/* Event description */}
+                <span className="text-[14px] font-semibold text-t-primary flex-1 truncate">
+                  {eventLabel(event)}
                 </span>
-              )}
 
-              <span className="text-xs text-gray-300 w-16 text-right">
-                +{(offsetMs / 1000).toFixed(2)}s
-              </span>
+                {/* Cost */}
+                {event.costUsd != null && event.costUsd > 0 && (
+                  <span className="text-[13px] font-mono font-bold text-t-secondary w-20 text-right">
+                    ${event.costUsd.toFixed(5)}
+                  </span>
+                )}
 
-              <span className={`text-gray-400 text-xs transition-transform ${open ? "rotate-90" : ""}`}>
-                ▶
-              </span>
-            </button>
+                {/* Time / Latency */}
+                <div className="text-[13px] text-t-ghost w-24 text-right flex flex-col items-end">
+                  <span className="font-mono font-medium">{event.latencyMs ? `${event.latencyMs}ms` : "—"}</span>
+                  <span className="text-[11px] font-medium">+{ (offsetMs / 1000).toFixed(2) }s</span>
+                </div>
 
-            {open && (
-              <div className="border-t border-dashed border-current border-opacity-20 px-4 py-3 space-y-3">
-                {event.type === "LLM_CALL" && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {[
-                      ["Model", event.model ?? "—"],
-                      ["Provider", event.provider ?? "—"],
-                      ["Tokens in", String(event.tokensIn ?? 0)],
-                      ["Tokens out", String(event.tokensOut ?? 0)],
-                    ].map(([l, v]) => (
-                      <div key={l}>
-                        <p className="text-xs text-gray-400">{l}</p>
-                        <p className="text-sm font-medium text-gray-800">{v}</p>
+                {/* Expand indicator */}
+                <span className={`text-t-ghost transition-transform duration-200 ${open ? "rotate-180" : ""}`}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </button>
+
+              {/* Expanded details */}
+              {open && (
+                <div className="ml-10 mr-4 mb-2 mt-3 p-5 bg-slate-50 border border-dim-border rounded-xl shadow-inner animate-slide-down">
+                  {event.type === "LLM_CALL" && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      {[
+                        ["Model", event.model ?? "—"],
+                        ["Provider", event.provider ?? "—"],
+                        ["Tokens In", String(event.tokensIn ?? 0)],
+                        ["Tokens Out", String(event.tokensOut ?? 0)],
+                      ].map(([l, v]) => (
+                        <div key={l}>
+                          <p className="text-[12px] font-semibold text-t-ghost mb-1">{l}</p>
+                          <p className="text-[14px] font-bold text-t-primary">{v}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {event.type === "TOOL_CALL" && (
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-[12px] font-bold text-t-secondary mb-1.5 flex items-center gap-2">
+                          <svg className="w-4 h-4 text-acc-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                          </svg>
+                          Payload Input
+                        </p>
+                        <pre className="text-[13px] font-mono bg-white border border-dim-border shadow-sm rounded-lg px-4 py-3 overflow-x-auto text-t-primary">
+                          {JSON.stringify(event.toolInput, null, 2)}
+                        </pre>
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                {event.type === "TOOL_CALL" && (
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-xs text-gray-400 mb-1">Input</p>
-                      <pre className="text-xs bg-white bg-opacity-60 rounded p-2 overflow-x-auto">
-                        {JSON.stringify(event.toolInput, null, 2)}
-                      </pre>
+                      <div>
+                        <p className="text-[12px] font-bold text-t-secondary mb-1.5 flex items-center gap-2">
+                          <svg className="w-4 h-4 text-acc-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                          </svg>
+                          Return Output
+                        </p>
+                        <pre className="text-[13px] font-mono bg-white border border-dim-border shadow-sm rounded-lg px-4 py-3 overflow-x-auto text-t-primary">
+                          {JSON.stringify(event.toolOutput, null, 2)}
+                        </pre>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-400 mb-1">Output</p>
-                      <pre className="text-xs bg-white bg-opacity-60 rounded p-2 overflow-x-auto">
-                        {JSON.stringify(event.toolOutput, null, 2)}
-                      </pre>
+                  )}
+
+                  {event.type === "ERROR" && (
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 bg-acc-red/10 border border-acc-red/20 rounded-lg p-4 shadow-sm">
+                        <svg className="w-6 h-6 text-acc-red flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                          <p className="text-[14px] font-bold text-acc-red">{event.errorMsg}</p>
+                          {event.errorCode && (
+                            <p className="text-[12px] font-semibold text-acc-red/80 mt-1">Code: {event.errorCode}</p>
+                          )}
+                        </div>
+                      </div>
+                      {event.errorStack && (
+                        <pre className="text-[12px] font-mono bg-white border border-dim-border shadow-sm rounded-lg px-4 py-3 overflow-x-auto text-t-secondary">
+                          {event.errorStack}
+                        </pre>
+                      )}
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {event.type === "ERROR" && (
-                  <div className="space-y-2">
-                    <p className="text-sm text-red-700">{event.errorMsg}</p>
-                    {event.errorCode && (
-                      <p className="text-xs text-gray-500">Code: {event.errorCode}</p>
-                    )}
-                    {event.errorStack && (
-                      <pre className="text-xs bg-red-900 bg-opacity-5 rounded p-2 overflow-x-auto text-red-800">
-                        {event.errorStack}
-                      </pre>
-                    )}
-                  </div>
-                )}
-
-                <details className="text-xs">
-                  <summary className="text-gray-400 cursor-pointer hover:text-gray-600">
-                    Raw payload
-                  </summary>
-                  <pre className="mt-2 bg-white bg-opacity-60 rounded p-2 overflow-x-auto text-gray-600">
-                    {JSON.stringify(event.payload, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            )}
-          </div>
-        );
-      })}
+                  <details className="text-[12px] font-mono mt-5 pt-5 border-t border-dim-border">
+                    <summary className="text-t-ghost font-medium cursor-pointer hover:text-t-primary transition-colors flex items-center gap-1.5 w-max outline-none">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                      View raw JSON payload
+                    </summary>
+                    <pre className="mt-3 bg-white border border-dim-border shadow-sm rounded-lg px-4 py-3 overflow-x-auto text-t-secondary">
+                      {JSON.stringify(event.payload, null, 2)}
+                    </pre>
+                  </details>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
 function eventLabel(event: Event): string {
   switch (event.type) {
-    case "LLM_CALL": return `${event.model ?? "unknown model"} · ${event.tokensIn ?? 0} in / ${event.tokensOut ?? 0} out`;
-    case "TOOL_CALL": return event.toolName ?? "unnamed tool";
-    case "ERROR": return event.errorMsg ?? "unknown error";
-    case "AGENT_START": return "Agent started";
-    case "AGENT_END": return "Agent finished";
-    default: return event.type;
+    case "LLM_CALL":
+      return `Generative Call: ${event.model ?? "unknown model"}`;
+    case "TOOL_CALL":
+      return `Executed Tool: ${event.toolName ?? "unnamed"}`;
+    case "ERROR":
+      return "Execution Failed";
+    case "AGENT_START":
+      return "Agent Initialized";
+    case "AGENT_END":
+      return "Agent Terminated Successfully";
+    default:
+      return event.type;
   }
 }

@@ -9,83 +9,92 @@ type Session = {
   totalTokensOut: number;
   errorCount: number;
   eventCount: number;
+  durationMs?: number | null;
   agent: { name: string } | null;
 };
 
-const STATUS_STYLES: Record<string, string> = {
-  COMPLETED: "bg-green-50 text-green-700",
-  RUNNING: "bg-blue-50 text-blue-700",
-  FAILED: "bg-red-50 text-red-700",
-  TIMEOUT: "bg-amber-50 text-amber-700",
+const STATUS_CONFIG: Record<string, { dot: string; label: string; text: string }> = {
+  COMPLETED: { dot: "bg-acc-green", label: "completed", text: "text-t-primary" },
+  RUNNING: { dot: "bg-acc-blue shadow-[0_0_8px_var(--color-acc-blue)] animate-pulse", label: "running", text: "text-acc-blue" },
+  FAILED: { dot: "bg-acc-red", label: "failed", text: "text-acc-red" },
+  TIMEOUT: { dot: "bg-amber", label: "timeout", text: "text-amber" },
 };
 
 export function SessionsTable({ sessions }: { sessions: Session[] }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-        <p className="text-xs text-gray-400">Recent sessions</p>
-        <Link href="/sessions" className="text-xs text-violet-600 hover:underline">
-          View all →
+    <div className="glass-panel overflow-hidden hover-lift bg-white">
+      <div className="px-6 py-5 border-b border-dim-border flex items-center justify-between bg-slate-50">
+        <p className="text-[11px] font-bold tracking-wider text-t-secondary uppercase">
+          Recent sessions
+        </p>
+        <Link href="/sessions" className="text-[13px] font-semibold text-acc-blue hover:text-blue-700 transition-colors flex items-center gap-1">
+          View all
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          </svg>
         </Link>
       </div>
 
       {sessions.length === 0 ? (
-        <div className="py-12 text-center text-sm text-gray-300">
-          No sessions yet — integrate the SDK to start tracking
+        <div className="py-16 flex flex-col items-center justify-center text-t-ghost bg-white">
+          <svg className="w-10 h-10 mb-4 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span className="text-[14px] font-semibold text-t-secondary">No sessions yet — integrate the SDK to start tracking</span>
         </div>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-xs text-gray-400 border-b border-gray-100">
-              <th className="text-left px-4 py-2 font-normal">Session</th>
-              <th className="text-left px-4 py-2 font-normal">Agent</th>
-              <th className="text-left px-4 py-2 font-normal">Status</th>
-              <th className="text-right px-4 py-2 font-normal">Cost</th>
-              <th className="text-right px-4 py-2 font-normal">Events</th>
-              <th className="text-right px-4 py-2 font-normal">Errors</th>
-              <th className="text-right px-4 py-2 font-normal">Started</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessions.map((s) => (
-              <tr
+        <div className="divide-y divide-dim-border bg-white">
+          {sessions.map((s) => {
+            const cfg = STATUS_CONFIG[s.status] ?? STATUS_CONFIG.COMPLETED;
+            return (
+              <Link
                 key={s.id}
-                className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                href={`/sessions/${s.id}`}
+                className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 transition-colors group"
               >
-                <td className="px-4 py-2.5">
-                  <Link
-                    href={`/sessions/${s.id}`}
-                    className="font-mono text-xs text-violet-600 hover:underline"
-                  >
-                    {s.id.slice(0, 12)}…
-                  </Link>
-                </td>
-                <td className="px-4 py-2.5 text-gray-700 text-xs">
-                  {s.agent?.name ?? "—"}
-                </td>
-                <td className="px-4 py-2.5">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_STYLES[s.status] ?? "bg-gray-100 text-gray-500"}`}>
-                    {s.status.toLowerCase()}
-                  </span>
-                </td>
-                <td className="px-4 py-2.5 text-right font-mono text-xs text-gray-700">
+                {/* Status dot */}
+                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
+
+                {/* Agent name */}
+                <span className={`text-[14px] font-semibold w-40 truncate group-hover:text-acc-blue transition-colors ${cfg.text}`}>
+                  {s.agent?.name ?? "Unknown Agent"}
+                </span>
+
+                {/* Session ID */}
+                <span className="text-[12px] font-mono text-t-ghost w-24 truncate hidden sm:block">
+                  {s.id.slice(0, 12)}…
+                </span>
+
+                {/* Event count */}
+                <span className="text-[13px] font-medium text-t-secondary w-20 text-right">
+                  {s.eventCount} events
+                </span>
+
+                {/* Cost */}
+                <span className="text-[13px] font-mono font-bold text-t-primary w-24 text-right">
                   ${s.totalCostUsd.toFixed(4)}
-                </td>
-                <td className="px-4 py-2.5 text-right text-xs text-gray-500">
-                  {s.eventCount}
-                </td>
-                <td className="px-4 py-2.5 text-right text-xs">
-                  <span className={s.errorCount > 0 ? "text-red-500" : "text-gray-400"}>
-                    {s.errorCount}
+                </span>
+
+                {/* Duration */}
+                <span className="text-[13px] font-medium text-t-ghost w-16 text-right hidden md:block">
+                  {s.durationMs ? `${(s.durationMs / 1000).toFixed(1)}s` : "—"}
+                </span>
+
+                {/* Errors */}
+                {s.errorCount > 0 && (
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-acc-red/10 border border-acc-red/20 text-acc-red ml-4 shadow-sm">
+                    {s.errorCount} error
                   </span>
-                </td>
-                <td className="px-4 py-2.5 text-right text-xs text-gray-400">
+                )}
+
+                {/* Time */}
+                <span className="text-[13px] font-medium text-t-ghost ml-auto hidden md:block">
                   {new Date(s.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       )}
     </div>
   );

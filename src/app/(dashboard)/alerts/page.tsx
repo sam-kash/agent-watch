@@ -20,11 +20,11 @@ export default async function AlertsPage() {
   });
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-5 max-w-3xl mx-auto animate-fade-in">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-lg font-semibold">Alerts</h1>
-          <p className="text-sm text-gray-500">Get notified when your agents misbehave</p>
+          <h1 className="font-display text-lg font-semibold text-t-primary">Alerts</h1>
+          <p className="text-[11px] font-mono text-t-ghost">Get notified when your agents misbehave</p>
         </div>
       </div>
 

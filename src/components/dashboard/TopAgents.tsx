@@ -1,31 +1,51 @@
-type Agent = { id: string; name: string; costUsd: number };
+type Agent = {
+  id: string;
+  name: string;
+  costUsd: number;
+};
 
 export function TopAgents({ agents }: { agents: Agent[] }) {
-  const max = Math.max(...agents.map((a) => a.costUsd), 0.000001);
+  if (agents.length === 0) {
+    return (
+      <div className="glass-panel p-6 h-full flex items-center justify-center bg-white hover-lift">
+        <span className="text-[14px] font-semibold text-t-secondary">No agent data yet</span>
+      </div>
+    );
+  }
+
+  const maxCost = Math.max(...agents.map((a) => a.costUsd), 0.0001);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4">
-      <p className="text-xs text-gray-400 mb-4">Top agents by cost</p>
-      {agents.length === 0 ? (
-        <p className="text-sm text-gray-300 text-center py-8">No data yet</p>
-      ) : (
-        <ul className="space-y-3">
-          {agents.map((a) => (
-            <li key={a.id}>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-gray-700 truncate max-w-[120px]">{a.name}</span>
-                <span className="text-gray-500 font-mono">${a.costUsd.toFixed(4)}</span>
+    <div className="glass-panel p-6 h-full bg-white hover-lift">
+      <p className="text-[11px] font-bold tracking-wide text-t-ghost uppercase mb-6">
+        Top agents by cost (7d)
+      </p>
+      <div className="space-y-5">
+        {agents.map((agent, i) => {
+          const pct = (agent.costUsd / maxCost) * 100;
+          return (
+            <div key={agent.id} className="group cursor-default">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-[11px] font-bold text-t-secondary shrink-0 border border-dim-border shadow-sm group-hover:bg-acc-blue group-hover:text-white transition-colors">
+                    {i + 1}
+                  </span>
+                  <span className="text-[14px] font-semibold text-t-primary truncate">{agent.name}</span>
+                </div>
+                <span className="text-[13px] font-mono font-bold text-t-secondary flex-shrink-0 group-hover:text-acc-blue transition-colors">
+                  ${agent.costUsd.toFixed(4)}
+                </span>
               </div>
-              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-slate-100 rounded-full overflow-hidden border border-dim-border/50 shadow-inner">
                 <div
-                  className="h-full bg-violet-500 rounded-full"
-                  style={{ width: `${(a.costUsd / max) * 100}%` }}
+                  className="h-full bg-gradient-to-r from-acc-blue to-acc-violet rounded-full transition-all duration-700 ease-out"
+                  style={{ width: `${pct}%` }}
                 />
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
