@@ -1,0 +1,21 @@
+{
+  "name": "agentwatch-telemetry",
+  "version": "1.0.0",
+  "description": "AgentWatch SDK for AI agent observability",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "observability",
+    "llm"
+  ],
+  "author": "AgentWatch",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

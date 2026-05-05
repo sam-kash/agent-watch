@@ -1,5 +1,9 @@
 # AgentWatch — AI Agent Observability
 
+I have it in the NPM registry -> lets gooo
+it is under 
+https://www.npmjs.com/package/agentwatch-telemetry
+
 Track cost, traces, failures, and token usage across every agent run.
 
 ## Quick start
