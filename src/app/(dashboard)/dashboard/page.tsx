@@ -21,7 +21,7 @@ export default async function DashboardPage({
   if (!ctx) redirect("/login");
   const workspaceId = ctx.workspace.id;
 
-  const [costResult, sessionStats, topAgentsRaw, errorCount, recentSessions, costSeries] =
+  const [costResult, sessionStats, topAgentsRaw, errorCount, recentSessions, costSeries, latencyResult] =
     await Promise.all([
       db.event.aggregate({
         where: { workspaceId, occurredAt: { gte: since } },
@@ -59,6 +59,10 @@ export default async function DashboardPage({
         GROUP BY date_trunc('hour', "occurredAt")
         ORDER BY date_trunc('hour', "occurredAt") ASC
       `,
+      db.event.aggregate({
+        where: { workspaceId, type: "LLM_CALL", occurredAt: { gte: since } },
+        _avg: { latencyMs: true },
+      }),
     ]);
 
   const totalSessions = sessionStats.reduce((a, s) => a + s._count.id, 0);
@@ -80,6 +84,9 @@ export default async function DashboardPage({
   const totalCost = costResult._sum.costUsd ?? 0;
   const totalTokens = (costResult._sum.tokensIn ?? 0) + (costResult._sum.tokensOut ?? 0);
 
+  const avgCostPerSession = totalSessions > 0 ? totalCost / totalSessions : 0;
+  const avgLatency = latencyResult._avg.latencyMs ?? 0;
+
   return (
     <div className="p-5 max-w-7xl mx-auto animate-fade-in">
       {/* Header */}
@@ -98,22 +105,28 @@ export default async function DashboardPage({
         <MetricStrip
           metrics={[
             {
+              label: "Unit Economics",
+              value: `$${avgCostPerSession.toFixed(4)}`,
+              sub: "avg cost per session",
+              color: "green",
+            },
+            {
+              label: "Avg Latency",
+              value: `${avgLatency.toFixed(0)}ms`,
+              sub: "per LLM call",
+              color: avgLatency > 2000 ? "amber" : "cyan",
+            },
+            {
               label: "Total cost",
               value: `$${totalCost.toFixed(4)}`,
               sub: `${formatNumber(costResult._sum.tokensIn ?? 0)} tokens in`,
-              color: "amber",
+              color: "default",
             },
             {
               label: "Sessions",
               value: String(totalSessions),
               sub: failedSessions > 0 ? `${failedSessions} failed` : "all healthy",
               color: failedSessions > 0 ? "red" : "default",
-            },
-            {
-              label: "LLM calls",
-              value: formatNumber(costResult._count.id),
-              sub: `${formatNumber(totalTokens)} total tokens`,
-              color: "cyan",
             },
             {
               label: "Errors",
