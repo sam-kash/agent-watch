@@ -16,26 +16,26 @@ const PLANS = [
     name: "Team",
     price: "$99",
     features: ["5 agents", "30-day history", "500K events/mo", "Slack alerts", "Team seats"],
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_TEAM,
+    variantId: process.env.NEXT_PUBLIC_LS_VARIANT_TEAM,
   },
   {
     id: "SCALE" as Plan,
     name: "Scale",
     price: "$249",
     features: ["Unlimited agents", "90-day history", "Unlimited events", "Audit logs", "SOC2-ready exports"],
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_SCALE,
+    variantId: process.env.NEXT_PUBLIC_LS_VARIANT_SCALE,
   },
 ];
 
 export function BillingPanel({ plan }: { plan: Plan }) {
   const [loading, setLoading] = useState<string | null>(null);
 
-  async function upgrade(priceId: string, planId: string) {
+  async function upgrade(variantId: string, planId: string) {
     setLoading(planId);
-    const res = await fetch("/api/stripe/checkout", {
+    const res = await fetch("/api/lemonsqueezy/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ priceId }),
+      body: JSON.stringify({ variantId }),
     });
     const { url } = await res.json();
     if (url) window.location.assign(url);
@@ -81,9 +81,9 @@ export function BillingPanel({ plan }: { plan: Plan }) {
                 <div className="text-[10px] text-center text-cyan font-mono font-medium py-1.5 bg-cyan/5 border border-cyan/20 rounded-md">
                   Current plan
                 </div>
-              ) : p.priceId ? (
+              ) : p.variantId ? (
                 <button
-                  onClick={() => upgrade(p.priceId!, p.id)}
+                  onClick={() => upgrade(p.variantId!, p.id)}
                   disabled={!!loading}
                   className="btn-primary w-full justify-center text-[10px] disabled:opacity-50"
                 >

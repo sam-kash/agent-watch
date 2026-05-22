@@ -47,8 +47,8 @@ export default function OnboardingPage() {
     setTimeout(() => setCopied(null), 2000);
   }
 
-  const snippetInstall = `npm install @agentwatch/sdk`;
-  const snippetUsage = `import AgentWatch from "@agentwatch/sdk";
+  const snippetInstall = `npm install agentwatch-telemetry`;
+  const snippetUsage = `import AgentWatch from "agentwatch-telemetry";
 
 const aw = new AgentWatch({
   apiKey: "${apiKey || "aw_live_..."}",

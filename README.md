@@ -42,3 +42,6 @@ await session.end();
 ## Stack
 
 Next.js 14 · TypeScript · Prisma · PostgreSQL · Redis · BullMQ · Supabase Auth · Stripe · Resend · Tailwind · Recharts
+
+
+https://www.npmjs.com/package/agentwatch-telemetry
