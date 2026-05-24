@@ -57,7 +57,10 @@ export async function POST(req: NextRequest) {
         create: {
           role: "OWNER",
           user: {
-            create: { email },
+            connectOrCreate: {
+              where: { email },
+              create: { email },
+            },
           },
         },
       },
