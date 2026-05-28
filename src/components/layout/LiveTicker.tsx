@@ -37,29 +37,24 @@ export function LiveTicker() {
   }
 
   return (
-    <div className="h-9 bg-slate-50 border-b border-dim-border flex items-center overflow-hidden relative shadow-[inset_0_-1px_2px_rgba(0,0,0,0.02)]">
+    <div className="h-10 bg-surface/50 backdrop-blur-md border-b border-dim-border flex items-center overflow-hidden relative text-[12px] font-medium tracking-wide">
       {/* Fade edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-slate-50 to-transparent z-10" />
-      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-slate-50 to-transparent z-10" />
+      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-void to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-void to-transparent z-10 pointer-events-none" />
 
-      <div className="flex animate-[ticker-scroll_40s_linear_infinite] whitespace-nowrap">
+      <div className="flex animate-[ticker-scroll_50s_linear_infinite] whitespace-nowrap">
         {/* Double the content for seamless loop */}
         {[...events, ...events].map((event, i) => (
-          <span key={`${event.id}-${i}`} className="inline-flex items-center gap-2 mx-6 text-[12px] font-sans">
-            <span className="text-t-ghost font-mono text-[11px] font-medium">{event.time}</span>
-            <span className="text-black font-semibold">{event.agent}</span>
-            <span className="text-t-ghost px-1">·</span>
-            <span className="text-t-secondary font-medium">{event.detail}</span>
-            <span className={event.status === "ok" ? "text-acc-green" : "text-acc-red"}>
-              {event.status === "ok" ? (
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
+          <span key={`${event.id}-${i}`} className="inline-flex items-center gap-2 mx-6 text-t-secondary border-r border-dim-border pr-6">
+            <span className="text-t-ghost font-mono text-[11px]">{event.time}</span>
+            <span className="text-white font-semibold">{event.agent}</span>
+            <span className="text-t-secondary truncate max-w-[200px]">{event.detail}</span>
+            <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${
+              event.status === "ok" 
+                ? "bg-acc-green/10 text-acc-green border border-acc-green/20" 
+                : "bg-acc-red/10 text-acc-red border border-acc-red/20"
+            }`}>
+              {event.status}
             </span>
           </span>
         ))}

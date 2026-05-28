@@ -88,13 +88,13 @@ export default async function DashboardPage({
   const avgLatency = latencyResult._avg.latencyMs ?? 0;
 
   return (
-    <div className="p-5 max-w-7xl mx-auto animate-fade-in">
+    <div className="p-6 max-w-7xl mx-auto animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-end justify-between mb-8 pb-4">
         <div>
-          <h1 className="font-display text-lg font-semibold text-t-primary">Overview</h1>
-          <p className="text-[11px] font-mono text-t-ghost">
-            Agent activity in the last {rangeLabel(range)}
+          <h1 className="text-[28px] font-semibold tracking-tight text-white">Overview</h1>
+          <p className="text-[14px] font-medium text-t-secondary mt-1">
+            Telemetry / {rangeLabel(range)}
           </p>
         </div>
         <RangePicker current={range} />

@@ -22,14 +22,14 @@ export function CommandBar({ workspaceName, plan, runningAgents = 0 }: Props) {
   const pathname = usePathname();
 
   return (
-    <header className="flex-shrink-0 border-b border-dim-border bg-white/80 backdrop-blur-xl sticky top-0 z-50">
-      <div className="flex items-center h-14 px-6 max-w-[1600px] mx-auto">
+    <header className="flex-shrink-0 sticky top-0 z-50 px-6 py-4">
+      <div className="glass-pill px-6 max-w-[1600px] mx-auto flex items-center h-14 transition-all">
         {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2 mr-10 group">
-          <div className="w-5 h-5 rounded-[5px] bg-black shadow-md flex items-center justify-center transition-transform group-hover:scale-105">
-            <div className="w-2 h-2 bg-white rounded-full" />
+        <Link href="/dashboard" className="flex items-center gap-3 mr-12 group">
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-active-border to-orange-400 shadow-sm flex items-center justify-center transition-transform group-hover:scale-105">
+            <div className="w-2 h-2 bg-white rounded-full shadow-inner" />
           </div>
-          <span className="font-display text-[15px] font-bold tracking-tight text-t-primary group-hover:text-acc-blue transition-colors">
+          <span className="font-semibold text-t-primary tracking-tight group-hover:text-active-border transition-colors">
             AgentWatch
           </span>
         </Link>
@@ -43,10 +43,10 @@ export function CommandBar({ workspaceName, plan, runningAgents = 0 }: Props) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative px-4 py-1.5 text-[13px] font-semibold rounded-md transition-all ${
+                className={`relative px-4 py-1.5 text-[13px] font-medium rounded-full transition-all ${
                   isActive
-                    ? "text-acc-blue bg-acc-blue/10 shadow-sm"
-                    : "text-t-secondary hover:text-black hover:bg-slate-100"
+                    ? "text-white bg-white/10 shadow-inner"
+                    : "text-t-secondary hover:text-t-primary hover:bg-white/5"
                 }`}
               >
                 {item.label}
@@ -56,20 +56,17 @@ export function CommandBar({ workspaceName, plan, runningAgents = 0 }: Props) {
         </nav>
 
         {/* Status strip */}
-        <div className="flex items-center gap-5 text-[13px] font-semibold">
+        <div className="flex items-center gap-6 text-[13px] font-medium">
           {runningAgents > 0 && (
-            <div className="flex items-center gap-2 bg-white border border-dim-border shadow-sm px-3 py-1 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-acc-green shadow-[0_0_8px_var(--color-acc-green)] animate-pulse" />
-              <span className="text-t-primary text-xs">
-                {runningAgents} active
-              </span>
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-acc-green/10 border border-acc-green/20">
+              <span className="w-2 h-2 rounded-full bg-acc-green shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
+              <span className="text-acc-green text-xs font-semibold">{runningAgents} Online</span>
             </div>
           )}
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full bg-gradient-to-tr from-acc-blue to-acc-violet opacity-90 shadow-sm" />
+          <div className="flex items-center gap-2 border-l border-dim-border pl-6">
             <span className="text-t-primary">{workspaceName}</span>
           </div>
-          <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wide bg-slate-100 border border-dim-border text-t-secondary uppercase">
+          <span className="px-3 py-1 rounded-full bg-active-border/10 border border-active-border/20 text-active-border text-xs font-semibold uppercase tracking-wider">
             {plan}
           </span>
         </div>
