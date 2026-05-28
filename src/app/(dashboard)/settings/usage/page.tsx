@@ -4,9 +4,9 @@ import { getServerAuthContext } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 const PLAN_LIMITS = {
-  FREE: { events: 10_000, agents: 1, label: "Starter" },
-  TEAM: { events: 500_000, agents: 5, label: "Team" },
-  SCALE: { events: Infinity, agents: Infinity, label: "Scale" },
+  FREE: { events: Infinity, agents: Infinity, label: "Free (Unlimited)" },
+  TEAM: { events: Infinity, agents: Infinity, label: "Free (Unlimited)" },
+  SCALE: { events: Infinity, agents: Infinity, label: "Free (Unlimited)" },
 };
 
 export default async function UsagePage() {
@@ -68,14 +68,6 @@ export default async function UsagePage() {
           <p className="text-xs text-violet-500 font-medium">Current plan</p>
           <p className="text-sm font-semibold text-violet-900">{limits.label}</p>
         </div>
-        {plan !== "SCALE" && (
-          <Link
-            href="/settings"
-            className="text-xs bg-violet-600 text-white px-3 py-1.5 rounded-lg hover:bg-violet-700 transition-colors"
-          >
-            Upgrade →
-          </Link>
-        )}
       </div>
 
       {/* Usage meters */}

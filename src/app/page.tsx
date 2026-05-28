@@ -23,30 +23,7 @@ const FEATURES = [
   },
 ];
 
-const PRICING = [
-  {
-    name: "Starter",
-    price: "$0",
-    sub: "forever free",
-    features: ["1 agent", "7-day history", "10K events/mo", "Email alerts"],
-    cta: "Start free",
-  },
-  {
-    name: "Team",
-    price: "$99",
-    sub: "/month",
-    features: ["5 agents", "30-day history", "500K events/mo", "Slack alerts", "Team seats"],
-    cta: "Start trial",
-    featured: true,
-  },
-  {
-    name: "Scale",
-    price: "$249",
-    sub: "/month",
-    features: ["Unlimited agents", "90-day history", "Unlimited events", "Audit logs", "SOC2 exports"],
-    cta: "Contact us",
-  },
-];
+
 
 export default function LandingPage() {
   return (
@@ -64,9 +41,6 @@ export default function LandingPage() {
           <span className="font-display text-[15px] font-bold tracking-tight text-t-primary">AgentWatch</span>
         </div>
         <div className="flex items-center gap-6">
-          <a href="#pricing" className="text-sm font-medium text-t-secondary hover:text-black transition-colors">
-            Pricing
-          </a>
           <Link href="/login" className="text-sm font-medium text-t-secondary hover:text-black transition-colors">
             Log in
           </Link>
@@ -185,63 +159,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="font-display text-4xl font-bold mb-4 text-black">
-            Simple, transparent pricing
-          </h2>
-          <p className="text-lg text-t-secondary font-medium">
-            Start for free. Scale when you need to.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {PRICING.map((plan) => (
-            <div
-              key={plan.name}
-              className={`glass-panel p-8 relative overflow-hidden bg-white hover-lift ${
-                plan.featured ? "border-acc-blue shadow-xl shadow-acc-blue/10 scale-105 z-10" : "border-dim-border shadow-sm"
-              }`}
-            >
-              {plan.featured && (
-                <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-acc-blue to-acc-violet" />
-              )}
-              {plan.featured && (
-                <div className="text-[11px] font-bold uppercase tracking-wider bg-acc-blue/10 text-acc-blue px-3 py-1 rounded-full inline-block mb-4">
-                  Most Popular
-                </div>
-              )}
-              <h3 className="text-xl font-bold text-black mb-2">
-                {plan.name}
-              </h3>
-              <div className="flex items-baseline gap-2 mb-6">
-                <span className="font-display text-5xl font-extrabold text-black">{plan.price}</span>
-                <span className="text-sm font-semibold text-t-secondary">{plan.sub}</span>
-              </div>
-              <ul className="space-y-4 mb-10">
-                {plan.features.map((f) => (
-                  <li key={f} className="text-[15px] font-medium text-t-secondary flex items-center gap-3">
-                    <svg className="w-5 h-5 text-acc-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/signup"
-                className={
-                  plan.featured 
-                    ? "btn-primary w-full justify-center text-[15px] py-3" 
-                    : "btn-secondary w-full justify-center text-[15px] py-3"
-                }
-              >
-                {plan.cta}
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
+
 
       {/* Footer */}
       <footer className="border-t border-dim-border py-12 px-6 mt-12 bg-slate-50 relative z-10">

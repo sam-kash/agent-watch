@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
 
 const PLAN_LIMITS = {
-  FREE: { eventsPerMonth: 10_000, agents: 1 },
-  TEAM: { eventsPerMonth: 500_000, agents: 5 },
+  FREE: { eventsPerMonth: Infinity, agents: Infinity },
+  TEAM: { eventsPerMonth: Infinity, agents: Infinity },
   SCALE: { eventsPerMonth: Infinity, agents: Infinity },
 } as const;
 
